@@ -1,0 +1,83 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getPaperById } from '../../lib/arxiv';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Calendar, User, FileText, ArrowLeft } from 'lucide-react';
+
+const { id } = Astro.params;
+
+if (!id) {
+    return Astro.redirect('/404');
+}
+
+const paper = await getPaperById(id);
+
+if (!paper) {
+     return Astro.redirect('/404');
+}
+---
+
+<Layout title={`${paper.title} - Modern arXiv`}>
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="mb-6">
+            <Button variant="ghost" size="sm" asChild className="pl-0 hover:pl-0">
+                <a href="javascript:history.back()" class="flex items-center text-muted-foreground hover:text-foreground">
+                    <ArrowLeft class="mr-2 h-4 w-4" /> Back to results
+                </a>
+            </Button>
+        </div>
+
+        <div class="space-y-6">
+            <div>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <Badge variant="secondary" className="text-sm">{paper.category}</Badge>
+                    <div class="flex items-center text-sm text-muted-foreground border px-2.5 py-0.5 rounded-full">
+                        <Calendar className="mr-2 h-3 w-3" />
+                        Published: {new Date(paper.published).toLocaleDateString()}
+                    </div>
+                     <div class="flex items-center text-sm text-muted-foreground border px-2.5 py-0.5 rounded-full">
+                        <Calendar className="mr-2 h-3 w-3" />
+                        Updated: {new Date(paper.updated).toLocaleDateString()}
+                    </div>
+                </div>
+
+                <h1 class="text-3xl md:text-4xl font-bold leading-tight mb-4">{paper.title}</h1>
+
+                <div class="flex flex-wrap gap-2 text-muted-foreground">
+                    {paper.authors.map((author) => (
+                         <div class="flex items-center bg-muted/50 px-2 py-1 rounded text-sm">
+                            <User className="mr-1 h-3 w-3" />
+                            {author}
+                         </div>
+                    ))}
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                {paper.pdfLink && (
+                    <Button asChild size="lg" className="w-full md:w-auto">
+                        <a href={paper.pdfLink} target="_blank" rel="noopener noreferrer">
+                            <FileText className="mr-2 h-5 w-5" /> View PDF
+                        </a>
+                    </Button>
+                )}
+                <Button asChild variant="outline" size="lg" className="w-full md:w-auto">
+                    <a href={`https://arxiv.org/abs/${paper.shortId}`} target="_blank" rel="noopener noreferrer">
+                        View on arXiv.org
+                    </a>
+                </Button>
+            </div>
+
+            <Card>
+                <CardContent className="pt-6">
+                    <h2 class="text-xl font-semibold mb-4">Abstract</h2>
+                    <p class="text-muted-foreground leading-relaxed whitespace-pre-line">
+                        {paper.summary}
+                    </p>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
+</Layout>

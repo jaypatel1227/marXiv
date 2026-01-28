@@ -1,0 +1,51 @@
+---
+import Layout from '../layouts/Layout.astro';
+import InfinitePaperList from '../components/InfinitePaperList';
+import SearchBar from '../components/SearchBar';
+import { searchPapers } from '../lib/arxiv';
+
+const q = Astro.url.searchParams.get('q') || '';
+const title = q ? `Search results for "${q}"` : 'Search';
+
+let entries: any[] = [];
+let totalResults = 0;
+
+if (q) {
+    try {
+        const result = await searchPapers(q, 0, 12);
+        entries = result.entries;
+        totalResults = result.totalResults;
+    } catch (e) {
+        console.error(e);
+    }
+}
+---
+
+<Layout title={`${title} - Modern arXiv`}>
+    <div class="container mx-auto px-4 py-8 space-y-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h1 class="text-3xl font-bold truncate">
+                {q ? `Results for "${q}"` : 'Search arXiv'}
+            </h1>
+            <div class="w-full md:w-auto md:min-w-[300px]">
+                 <SearchBar client:load initialQuery={q} className="w-full" />
+            </div>
+        </div>
+
+        {q ? (
+            <div class="space-y-4">
+                <p class="text-sm text-muted-foreground">Found {totalResults} results</p>
+                <InfinitePaperList
+                    client:load
+                    initialPapers={entries}
+                    query={q}
+                    totalResults={totalResults}
+                />
+            </div>
+        ) : (
+            <div class="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
+                <p class="text-lg">Enter a search term to find papers.</p>
+            </div>
+        )}
+    </div>
+</Layout>

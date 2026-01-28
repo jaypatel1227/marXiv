@@ -1,0 +1,41 @@
+---
+import Layout from '../layouts/Layout.astro';
+import InfinitePaperList from '../components/InfinitePaperList';
+import SearchBar from '../components/SearchBar';
+import { searchPapers } from '../lib/arxiv';
+
+// Fetch recent CS papers
+const initialQuery = "cat:cs.AI";
+const { entries, totalResults } = await searchPapers(initialQuery, 0, 12);
+---
+
+<Layout title="Modern arXiv - Home">
+	<div class="container mx-auto px-4 py-8 space-y-8">
+		<section class="flex flex-col items-center justify-center py-12 md:py-20 text-center space-y-4">
+			<h1 class="text-4xl md:text-6xl font-bold tracking-tighter">
+				Explore arXiv <br class="hidden md:inline" />
+				<span class="text-primary">Beautifully</span>
+			</h1>
+			<p class="text-xl text-muted-foreground max-w-[600px]">
+				A modern, dark-mode interface for the arXiv preprint server. Discover the latest research in Computer Science, Physics, and more.
+			</p>
+			<div class="w-full max-w-md pt-4">
+				<SearchBar client:load className="w-full" />
+			</div>
+		</section>
+
+		<section>
+			<div class="flex items-center justify-between mb-6">
+				<h2 class="text-3xl font-bold tracking-tight">Recent in AI</h2>
+				<a href="/categories" class="text-sm font-medium hover:underline text-muted-foreground">View all categories</a>
+			</div>
+
+			<InfinitePaperList
+				client:visible
+				initialPapers={entries}
+				query={initialQuery}
+				totalResults={totalResults}
+			/>
+		</section>
+	</div>
+</Layout>

@@ -1,0 +1,84 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+
+const categories = [
+    { name: "Artificial Intelligence", id: "cs.AI", description: "Artificial Intelligence" },
+    { name: "Machine Learning", id: "cs.LG", description: "Machine Learning" },
+    { name: "Computer Vision", id: "cs.CV", description: "Computer Vision and Pattern Recognition" },
+    { name: "Computation and Language", id: "cs.CL", description: "Natural Language Processing" },
+    { name: "Software Engineering", id: "cs.SE", description: "Software Engineering" },
+    { name: "Robotics", id: "cs.RO", description: "Robotics" },
+    { name: "Cryptography", id: "cs.CR", description: "Cryptography and Security" },
+    { name: "Data Structures", id: "cs.DS", description: "Data Structures and Algorithms" },
+    { name: "Operating Systems", id: "cs.OS", description: "Operating Systems" },
+    { name: "Networking", id: "cs.NI", description: "Networking and Internet Architecture" },
+];
+
+const physicsCategories = [
+    { name: "Astrophysics", id: "astro-ph", description: "Astrophysics" },
+    { name: "Quantum Physics", id: "quant-ph", description: "Quantum Physics" },
+    { name: "Condensed Matter", id: "cond-mat", description: "Condensed Matter" },
+];
+
+const mathCategories = [
+    { name: "Algebraic Geometry", id: "math.AG", description: "Algebraic Geometry" },
+    { name: "Number Theory", id: "math.NT", description: "Number Theory" },
+    { name: "Probability", id: "math.PR", description: "Probability" },
+];
+
+---
+
+<Layout title="Categories - Modern arXiv">
+    <div class="container mx-auto px-4 py-8 space-y-8">
+        <h1 class="text-4xl font-bold">Categories</h1>
+
+        <section>
+            <h2 class="text-2xl font-semibold mb-4">Computer Science</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {categories.map(cat => (
+                    <a href={`/search?q=cat:${cat.id}`} class="block h-full">
+                        <Card className="h-full hover:bg-muted/50 transition-colors">
+                            <CardHeader>
+                                <CardTitle>{cat.name}</CardTitle>
+                                <CardDescription>{cat.id}</CardDescription>
+                            </CardHeader>
+                        </Card>
+                    </a>
+                ))}
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-semibold mb-4">Physics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                 {physicsCategories.map(cat => (
+                    <a href={`/search?q=cat:${cat.id}`} class="block h-full">
+                        <Card className="h-full hover:bg-muted/50 transition-colors">
+                            <CardHeader>
+                                <CardTitle>{cat.name}</CardTitle>
+                                <CardDescription>{cat.id}</CardDescription>
+                            </CardHeader>
+                        </Card>
+                    </a>
+                ))}
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-semibold mb-4">Mathematics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                 {mathCategories.map(cat => (
+                    <a href={`/search?q=cat:${cat.id}`} class="block h-full">
+                        <Card className="h-full hover:bg-muted/50 transition-colors">
+                            <CardHeader>
+                                <CardTitle>{cat.name}</CardTitle>
+                                <CardDescription>{cat.id}</CardDescription>
+                            </CardHeader>
+                        </Card>
+                    </a>
+                ))}
+            </div>
+        </section>
+    </div>
+</Layout>

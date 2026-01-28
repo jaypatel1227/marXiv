@@ -1,0 +1,60 @@
+---
+import '../styles/global.css';
+import SearchBar from '../components/SearchBar';
+import { Button } from '@/components/ui/button';
+import { Github } from 'lucide-react';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Modern arXiv Browser" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class="bg-background text-foreground min-h-screen font-sans antialiased flex flex-col">
+        <header class="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
+            <div class="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+                <a href="/" class="text-xl font-bold flex items-center gap-2">
+                    <span class="bg-primary text-primary-foreground px-2 py-1 rounded">arXiv</span>
+                    <span>Modern</span>
+                </a>
+
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="/categories" class="text-sm font-medium hover:text-primary transition-colors">Categories</a>
+                </div>
+
+                <div class="flex items-center gap-4 flex-1 justify-end">
+                    <div class="w-full max-w-xs hidden sm:block">
+                        <SearchBar client:load className="w-full" />
+                    </div>
+                    <!-- Using client:visible or static rendering for Button/Icon -->
+                    <Button variant="ghost" size="icon" asChild className="hidden sm:inline-flex">
+                        <a href="https://github.com/arxiv" target="_blank" rel="noopener noreferrer">
+                            <Github className="h-5 w-5" />
+                            <span class="sr-only">GitHub</span>
+                        </a>
+                    </Button>
+                </div>
+            </div>
+        </header>
+		<main class="flex-1">
+		<slot />
+        </main>
+        <footer class="border-t py-6">
+            <div class="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground gap-4">
+                <p>Built with Astro, React & Tailwind.</p>
+                <p>Data provided by <a href="https://arxiv.org" target="_blank" rel="noreferrer" class="underline hover:text-foreground">arXiv</a> API.</p>
+            </div>
+        </footer>
+	</body>
+</html>
