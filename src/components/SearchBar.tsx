@@ -19,18 +19,20 @@ export default function SearchBar({ initialQuery = "", className = "" }: SearchB
   };
 
   return (
-    <form onSubmit={handleSubmit} className={`flex w-full items-center space-x-2 ${className}`}>
-      <div className="relative w-full">
-         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+    <form onSubmit={handleSubmit} className={`flex w-full items-center gap-0 ${className}`}>
+      <div className="relative w-full group">
+         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
          <Input
             type="search"
-            placeholder="Search arXiv papers..."
-            className="pl-9"
+            placeholder="ENTER_QUERY..."
+            className="pl-10 h-12 bg-background border-r-0 border-primary/20 focus-visible:ring-0 focus-visible:border-primary transition-colors"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
          />
       </div>
-      <Button type="submit">Search</Button>
+      <Button type="submit" className="h-12 px-6 border border-l-0 border-primary/20 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all">
+        SEARCH
+      </Button>
     </form>
   );
 }
