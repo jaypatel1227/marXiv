@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, FileText, User, ArrowRight } from "lucide-react";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 interface PaperCardProps {
   paper: ArxivPaper;
@@ -22,7 +23,9 @@ export default function PaperCard({ paper }: PaperCardProps) {
             </Badge>
         </div>
         <a href={`/paper/${paper.shortId}`} className="block group-hover:text-primary transition-colors">
-            <CardTitle className="text-xl leading-tight font-bold">{paper.title}</CardTitle>
+            <CardTitle className="text-xl leading-tight font-bold">
+              <MarkdownRenderer content={paper.title} components={{ p: 'span' }} />
+            </CardTitle>
         </a>
       </CardHeader>
       <CardContent className="flex-grow pb-4">
@@ -39,9 +42,10 @@ export default function PaperCard({ paper }: PaperCardProps) {
                 </span>
              </div>
         </div>
-        <p className="text-sm text-muted-foreground/80 line-clamp-3 leading-relaxed">
-          {paper.summary}
-        </p>
+        <MarkdownRenderer
+          content={paper.summary}
+          className="text-sm text-muted-foreground/80 line-clamp-3 leading-relaxed"
+        />
       </CardContent>
       <CardFooter className="pt-0 gap-3">
         <Button asChild variant="outline" size="sm" className="flex-1">
