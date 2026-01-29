@@ -5,7 +5,7 @@ export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const q = url.searchParams.get('q') || '';
   const start = parseInt(url.searchParams.get('start') || '0');
-  const max_results = 10;
+  const max_results = parseInt(url.searchParams.get('max_results') || '12');
 
   if (!q) {
     return new Response(JSON.stringify({ error: 'Query parameter "q" is required' }), {
