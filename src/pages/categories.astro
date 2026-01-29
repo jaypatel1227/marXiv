@@ -1,32 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-
-const categories = [
-    { name: "Artificial Intelligence", id: "cs.AI", description: "Artificial Intelligence" },
-    { name: "Machine Learning", id: "cs.LG", description: "Machine Learning" },
-    { name: "Computer Vision", id: "cs.CV", description: "Computer Vision and Pattern Recognition" },
-    { name: "Computation and Language", id: "cs.CL", description: "Natural Language Processing" },
-    { name: "Software Engineering", id: "cs.SE", description: "Software Engineering" },
-    { name: "Robotics", id: "cs.RO", description: "Robotics" },
-    { name: "Cryptography", id: "cs.CR", description: "Cryptography and Security" },
-    { name: "Data Structures", id: "cs.DS", description: "Data Structures and Algorithms" },
-    { name: "Operating Systems", id: "cs.OS", description: "Operating Systems" },
-    { name: "Networking", id: "cs.NI", description: "Networking and Internet Architecture" },
-];
-
-const physicsCategories = [
-    { name: "Astrophysics", id: "astro-ph", description: "Astrophysics" },
-    { name: "Quantum Physics", id: "quant-ph", description: "Quantum Physics" },
-    { name: "Condensed Matter", id: "cond-mat", description: "Condensed Matter" },
-];
-
-const mathCategories = [
-    { name: "Algebraic Geometry", id: "math.AG", description: "Algebraic Geometry" },
-    { name: "Number Theory", id: "math.NT", description: "Number Theory" },
-    { name: "Probability", id: "math.PR", description: "Probability" },
-];
-
+import CategoryBrowser from '@/components/CategoryBrowser';
 ---
 
 <Layout title="Categories - Modern arXiv">
@@ -36,61 +10,6 @@ const mathCategories = [
             <p class="text-muted-foreground font-mono text-sm mt-2">SELECT_DOMAIN_TO_BROWSE</p>
         </div>
 
-        <section>
-            <h2 class="text-xl text-primary font-bold mb-6 flex items-center gap-2">
-                <span class="w-1 h-4 bg-primary"></span>
-                [ COMPUTER_SCIENCE ]
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categories.map(cat => (
-                    <a href={`/search?q=cat:${cat.id}`} class="block h-full group">
-                        <Card className="h-full bg-card/50 hover:bg-card hover:border-primary transition-all group-hover:shadow-[0_0_15px_hsl(var(--primary)/0.1)]">
-                            <CardHeader>
-                                <CardTitle className="group-hover:text-primary transition-colors">{cat.name}</CardTitle>
-                                <CardDescription className="font-mono text-xs uppercase tracking-widest text-primary/70">{cat.id}</CardDescription>
-                            </CardHeader>
-                        </Card>
-                    </a>
-                ))}
-            </div>
-        </section>
-
-        <section>
-            <h2 class="text-xl text-primary font-bold mb-6 flex items-center gap-2">
-                <span class="w-1 h-4 bg-primary"></span>
-                [ PHYSICS ]
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                 {physicsCategories.map(cat => (
-                    <a href={`/search?q=cat:${cat.id}`} class="block h-full group">
-                        <Card className="h-full bg-card/50 hover:bg-card hover:border-primary transition-all group-hover:shadow-[0_0_15px_hsl(var(--primary)/0.1)]">
-                            <CardHeader>
-                                <CardTitle className="group-hover:text-primary transition-colors">{cat.name}</CardTitle>
-                                <CardDescription className="font-mono text-xs uppercase tracking-widest text-primary/70">{cat.id}</CardDescription>
-                            </CardHeader>
-                        </Card>
-                    </a>
-                ))}
-            </div>
-        </section>
-
-        <section>
-            <h2 class="text-xl text-primary font-bold mb-6 flex items-center gap-2">
-                <span class="w-1 h-4 bg-primary"></span>
-                [ MATHEMATICS ]
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                 {mathCategories.map(cat => (
-                    <a href={`/search?q=cat:${cat.id}`} class="block h-full group">
-                        <Card className="h-full bg-card/50 hover:bg-card hover:border-primary transition-all group-hover:shadow-[0_0_15px_hsl(var(--primary)/0.1)]">
-                            <CardHeader>
-                                <CardTitle className="group-hover:text-primary transition-colors">{cat.name}</CardTitle>
-                                <CardDescription className="font-mono text-xs uppercase tracking-widest text-primary/70">{cat.id}</CardDescription>
-                            </CardHeader>
-                        </Card>
-                    </a>
-                ))}
-            </div>
-        </section>
+        <CategoryBrowser client:load />
     </div>
 </Layout>

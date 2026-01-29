@@ -12,7 +12,7 @@ let totalResults = 0;
 
 if (q) {
     try {
-        const result = await searchPapers(q, 0, 12);
+        const result = await searchPapers(q, 0, 100);
         entries = result.entries;
         totalResults = result.totalResults;
     } catch (e) {
