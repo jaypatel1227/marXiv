@@ -90,9 +90,46 @@ function parseEntry(entry: any): ArxivPaper {
     };
 }
 
+function formatQuery(query: string): string {
+  // regex to match phrases in quotes or single words
+  const regex = /"[^"]+"|\S+/g;
+  const tokens = query.match(regex) || [];
+
+  const operators = ['AND', 'OR', 'ANDNOT'];
+  const result: string[] = [];
+
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    const upperToken = token.toUpperCase();
+
+    let effectiveToken = token;
+    let isOperator = operators.includes(upperToken);
+
+    if (upperToken === 'AND' || upperToken === 'OR' || upperToken === 'ANDNOT') {
+      effectiveToken = upperToken; // Normalize to uppercase
+      isOperator = true;
+    }
+
+    if (i > 0) {
+      const prevToken = result[result.length - 1];
+      const prevUpper = prevToken.toUpperCase();
+      const prevIsOperator = operators.includes(prevUpper);
+
+      if (!isOperator && !prevIsOperator) {
+        result.push('AND');
+      }
+    }
+
+    result.push(effectiveToken);
+  }
+
+  return result.join(' ');
+}
+
 export async function searchPapers(query: string, start = 0, maxResults = 10): Promise<ArxivResponse> {
+  const formattedQuery = formatQuery(query);
   const params = new URLSearchParams({
-    search_query: query,
+    search_query: formattedQuery,
     start: start.toString(),
     max_results: maxResults.toString(),
     sortBy: 'submittedDate',
