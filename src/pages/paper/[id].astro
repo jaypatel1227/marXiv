@@ -20,82 +20,60 @@ if (!paper) {
 ---
 
 <Layout title={`${paper.title} - Modern arXiv`}>
-    <div class="container mx-auto px-4 py-12 max-w-5xl">
-        <div class="mb-8">
-            <Button variant="ghost" size="sm" asChild className="pl-0 hover:pl-0 text-muted-foreground hover:text-primary transition-colors">
-                <a href="javascript:history.back()" class="flex items-center font-mono text-xs tracking-widest uppercase">
-                    <ArrowLeft class="mr-2 h-4 w-4" /> Return_To_Index
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="mb-6">
+            <Button variant="ghost" size="sm" asChild className="pl-0 hover:pl-0">
+                <a href="javascript:history.back()" class="flex items-center text-muted-foreground hover:text-foreground">
+                    <ArrowLeft class="mr-2 h-4 w-4" /> Back to results
                 </a>
             </Button>
         </div>
 
-        <div class="space-y-8 border-l-2 border-primary/20 pl-4 md:pl-8 py-2 relative">
-            <div class="absolute top-0 left-0 w-2 h-2 bg-primary -translate-x-[5px]"></div>
-            <div class="absolute bottom-0 left-0 w-2 h-2 bg-primary -translate-x-[5px]"></div>
-
+        <div class="space-y-6">
             <div>
-                <div class="flex flex-wrap items-center gap-4 mb-6">
-                    <Badge variant="outline" className="text-sm border-primary text-primary bg-primary/5 px-3 py-1">
-                        CAT: {paper.category}
-                    </Badge>
-                    <div class="flex items-center text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                        <span className="text-primary mr-2">ID:</span> {paper.shortId}
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <Badge variant="secondary" className="text-sm">{paper.category}</Badge>
+                    <div class="flex items-center text-sm text-muted-foreground border px-2.5 py-0.5 rounded-full">
+                        <Calendar className="mr-2 h-3 w-3" />
+                        Published: {new Date(paper.published).toLocaleDateString()}
+                    </div>
+                     <div class="flex items-center text-sm text-muted-foreground border px-2.5 py-0.5 rounded-full">
+                        <Calendar className="mr-2 h-3 w-3" />
+                        Updated: {new Date(paper.updated).toLocaleDateString()}
                     </div>
                 </div>
 
-                <h1 class="text-4xl md:text-5xl font-display font-bold leading-none mb-6 text-foreground uppercase tracking-wide">
-                    {paper.title}
-                </h1>
+                <h1 class="text-3xl md:text-4xl font-bold leading-tight mb-4">{paper.title}</h1>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                    <div>
-                        <h3 className="font-mono text-xs text-primary mb-2 uppercase tracking-widest">// AUTHORS</h3>
-                        <div class="flex flex-wrap gap-2">
-                            {paper.authors.map((author) => (
-                                <div class="flex items-center bg-secondary/50 border border-secondary px-2 py-1 text-xs text-muted-foreground font-mono hover:text-foreground hover:border-primary/50 transition-colors">
-                                    {author}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div class="space-y-2 font-mono text-xs text-muted-foreground">
-                        <div class="flex justify-between md:justify-start gap-4 border-b border-border/50 pb-1">
-                            <span class="text-primary">PUBLISHED:</span>
-                            <span>{new Date(paper.published).toLocaleDateString()}</span>
-                        </div>
-                        <div class="flex justify-between md:justify-start gap-4 border-b border-border/50 pb-1">
-                            <span class="text-primary">UPDATED:</span>
-                            <span>{new Date(paper.updated).toLocaleDateString()}</span>
-                        </div>
-                    </div>
+                <div class="flex flex-wrap gap-2 text-muted-foreground">
+                    {paper.authors.map((author) => (
+                         <div class="flex items-center bg-muted/50 px-2 py-1 rounded text-sm">
+                            <User className="mr-1 h-3 w-3" />
+                            {author}
+                         </div>
+                    ))}
                 </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+            <div class="flex gap-4">
                 {paper.pdfLink && (
-                    <Button asChild size="lg" className="w-full sm:w-auto font-bold tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)] transition-all">
+                    <Button asChild size="lg" className="w-full md:w-auto">
                         <a href={paper.pdfLink} target="_blank" rel="noopener noreferrer">
-                            <FileText className="mr-2 h-5 w-5" /> INITIATE_DOWNLOAD (PDF)
+                            <FileText className="mr-2 h-5 w-5" /> View PDF
                         </a>
                     </Button>
                 )}
-                <Button asChild variant="outline" size="lg" className="w-full sm:w-auto font-mono text-xs border-primary/30 text-primary hover:bg-primary/10">
+                <Button asChild variant="outline" size="lg" className="w-full md:w-auto">
                     <a href={`https://arxiv.org/abs/${paper.shortId}`} target="_blank" rel="noopener noreferrer">
-                        OPEN_SOURCE (ARXIV.ORG)
+                        View on arXiv.org
                     </a>
                 </Button>
             </div>
 
-            <Card className="bg-background/50 border-dashed border-muted-foreground/30 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-100 transition-opacity">
-                    <div class="w-16 h-16 border-t-2 border-r-2 border-primary"></div>
-                </div>
-                <CardContent className="pt-8 px-8">
-                    <h2 class="text-sm font-mono font-bold text-primary mb-6 uppercase tracking-widest flex items-center gap-2">
-                        <span class="w-2 h-2 bg-primary"></span>
-                        Abstract // Decrypted_Content
-                    </h2>
-                    <p class="text-muted-foreground leading-7 whitespace-pre-line font-sans text-lg">
+            <Card>
+                <CardContent className="pt-6">
+                    <h2 class="text-xl font-semibold mb-4">Abstract</h2>
+                    <p class="text-muted-foreground leading-relaxed whitespace-pre-line">
                         {paper.summary}
                     </p>
                 </CardContent>

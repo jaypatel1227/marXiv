@@ -53,5 +53,5 @@ coverage/
 # Optional stylelint cache
 .stylelintcache
 
-# Local Netlify folder
-.netlify
+# Netlify
+.netlify/

@@ -10,32 +10,24 @@ const { entries, totalResults } = await searchPapers(initialQuery, 0, 12);
 ---
 
 <Layout title="Modern arXiv - Home">
-	<div class="container mx-auto px-4 py-8 space-y-12">
-		<section class="flex flex-col items-center justify-center py-16 md:py-24 text-center space-y-6 relative overflow-hidden">
-            <div class="absolute inset-0 bg-primary/5 blur-[100px] rounded-full pointer-events-none -z-10"></div>
-			<div class="inline-flex items-center px-3 py-1 rounded-none border border-primary/20 bg-primary/5 text-primary text-xs font-mono mb-4 tracking-widest uppercase">
-				<span class="w-2 h-2 rounded-full bg-primary mr-2 animate-pulse"></span>
-				System Online
-			</div>
-			<h1 class="text-5xl md:text-7xl font-display font-bold tracking-wide uppercase text-transparent bg-clip-text bg-gradient-to-b from-foreground to-foreground/50 leading-[0.9]">
-				Global Knowledge <br />
-				<span class="text-primary">Repository</span>
+	<div class="container mx-auto px-4 py-8 space-y-8">
+		<section class="flex flex-col items-center justify-center py-12 md:py-20 text-center space-y-4">
+			<h1 class="text-4xl md:text-6xl font-bold tracking-tighter">
+				Explore arXiv <br class="hidden md:inline" />
+				<span class="text-primary">Beautifully</span>
 			</h1>
-			<p class="text-lg md:text-xl text-muted-foreground max-w-[600px] font-mono border-l-2 border-primary/30 pl-4 text-left md:text-center md:border-l-0 md:pl-0">
-				Secure connection established. Accessing arXiv data uplink. <br class="hidden md:block"/>
-                Begin search sequence or browse latest intelligence streams.
+			<p class="text-xl text-muted-foreground max-w-[600px]">
+				A modern, dark-mode interface for the arXiv preprint server. Discover the latest research in Computer Science, Physics, and more.
 			</p>
-			<div class="w-full max-w-lg pt-8 relative z-10">
-				<SearchBar client:load className="w-full drop-shadow-[0_0_15px_hsl(var(--primary)/0.1)]" />
+			<div class="w-full max-w-md pt-4">
+				<SearchBar client:load className="w-full" />
 			</div>
 		</section>
 
 		<section>
-			<div class="flex items-center justify-between mb-8 border-b border-primary/20 pb-2">
-				<h2 class="text-2xl font-display font-bold tracking-widest uppercase flex items-center gap-2">
-                    <span class="text-primary">//</span> INCOMING STREAM: AI
-                </h2>
-				<a href="/categories" class="text-xs font-mono font-bold tracking-widest hover:text-primary transition-colors text-muted-foreground uppercase">[ Access_All_Channels ]</a>
+			<div class="flex items-center justify-between mb-6">
+				<h2 class="text-3xl font-bold tracking-tight">Recent in AI</h2>
+				<a href="/categories" class="text-sm font-medium hover:underline text-muted-foreground">View all categories</a>
 			</div>
 
 			<InfinitePaperList
