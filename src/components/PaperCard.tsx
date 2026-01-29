@@ -3,7 +3,7 @@ import type { ArxivPaper } from "@/lib/arxiv";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, FileText, User } from "lucide-react";
+import { Calendar, FileText, User, ArrowRight } from "lucide-react";
 
 interface PaperCardProps {
   paper: ArxivPaper;
@@ -11,43 +11,48 @@ interface PaperCardProps {
 
 export default function PaperCard({ paper }: PaperCardProps) {
   return (
-    <Card className="flex flex-col h-full hover:shadow-md transition-shadow">
-      <CardHeader>
-        <div className="flex justify-between items-start gap-4">
-            <a href={`/paper/${paper.shortId}`} className="hover:underline decoration-primary">
-                <CardTitle className="text-lg font-bold leading-tight text-primary">{paper.title}</CardTitle>
-            </a>
+    <Card className="group flex flex-col h-full bg-card/50 hover:bg-card transition-all border-l-2 border-l-border hover:border-l-primary hover:shadow-lg">
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start gap-4 mb-2">
+            <span className="font-mono text-[10px] text-muted-foreground">
+                {paper.shortId}
+            </span>
+            <Badge variant="outline" className="border-primary/20 text-primary hover:bg-primary/10">
+                {paper.category}
+            </Badge>
         </div>
-        <div className="flex flex-wrap gap-2 mt-2">
-            <Badge variant="secondary" className="text-xs">{paper.category}</Badge>
-            <div className="flex items-center text-xs text-muted-foreground">
-                <Calendar className="mr-1 h-3 w-3" />
+        <a href={`/paper/${paper.shortId}`} className="block group-hover:text-primary transition-colors">
+            <CardTitle className="text-xl leading-tight font-bold">{paper.title}</CardTitle>
+        </a>
+      </CardHeader>
+      <CardContent className="flex-grow pb-4">
+        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground mb-4">
+             <div className="flex items-center">
+                <Calendar className="mr-1.5 h-3.5 w-3.5" />
                 {new Date(paper.published).toLocaleDateString()}
             </div>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <p className="text-sm text-muted-foreground line-clamp-3">
-          {paper.summary}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-y-1 gap-x-4 text-xs text-muted-foreground">
              <div className="flex items-center">
-                <User className="mr-1 h-3 w-3" />
-                <span className="truncate max-w-[200px]">
-                    {paper.authors.slice(0, 3).join(", ")}
-                    {paper.authors.length > 3 && " et al."}
+                <User className="mr-1.5 h-3.5 w-3.5" />
+                <span className="truncate max-w-[200px]" title={paper.authors.join(", ")}>
+                    {paper.authors.slice(0, 2).join(", ")}
+                    {paper.authors.length > 2 && " et al."}
                 </span>
              </div>
         </div>
+        <p className="text-sm text-muted-foreground/80 line-clamp-3 leading-relaxed">
+          {paper.summary}
+        </p>
       </CardContent>
-      <CardFooter className="pt-0">
-        <Button asChild variant="outline" size="sm" className="w-full">
-            <a href={`/paper/${paper.shortId}`}>View Details</a>
+      <CardFooter className="pt-0 gap-3">
+        <Button asChild variant="outline" size="sm" className="flex-1">
+            <a href={`/paper/${paper.shortId}`}>
+                View Abstract <ArrowRight className="ml-2 h-4 w-4" />
+            </a>
         </Button>
         {paper.pdfLink && (
-             <Button asChild variant="default" size="sm" className="w-full ml-2">
+             <Button asChild variant="ghost" size="sm" className="px-3" title="Download PDF">
                 <a href={paper.pdfLink} target="_blank" rel="noopener noreferrer">
-                    <FileText className="mr-2 h-4 w-4" /> PDF
+                    <FileText className="h-4 w-4" />
                 </a>
             </Button>
         )}

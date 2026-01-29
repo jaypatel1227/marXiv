@@ -32,45 +32,64 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  --font-sans: "Titillium Web", sans-serif;
+  --font-display: "Rajdhani", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
 :root {
-  /* Dark Mode Default (Zinc) */
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
+  /* Research Terminal Theme */
 
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
+  /* Background: Void Black #050505 */
+  --background: 0 0% 2%;
+  /* Foreground: Slate 200 #e2e8f0 */
+  --foreground: 214 32% 91%;
 
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
+  /* Card: Zinc 950 #09090b */
+  --card: 240 10% 4%;
+  --card-foreground: 214 32% 91%;
 
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
+  /* Popover matches card */
+  --popover: 240 10% 4%;
+  --popover-foreground: 214 32% 91%;
 
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
+  /* Primary: Neon Cyan #00f3ff */
+  --primary: 183 100% 50%;
+  /* Primary FG: Black */
+  --primary-foreground: 0 0% 0%;
 
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
+  /* Secondary: Slate 800 #1e293b */
+  --secondary: 215 28% 17%;
+  --secondary-foreground: 214 32% 91%;
 
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
+  /* Muted: Slate 900 #0f172a */
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+
+  /* Accent: Cyan 900/20 (Subtle highlight) */
+  --accent: 183 100% 15%;
+  --accent-foreground: 183 100% 50%;
 
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 83.9%;
+  /* Border: Slate 800 #1e293b */
+  --border: 215 28% 17%;
+  --input: 215 28% 17%;
+  --ring: 183 100% 50%;
 
-  --radius: 0.5rem;
+  --radius: 0px;
 }
 
 @layer base {
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
   }
 
   * {
