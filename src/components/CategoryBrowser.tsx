@@ -1,4 +1,4 @@
-import React, { useState, useTransition, useMemo } from 'react';
+import React, { useState, useTransition, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { CATEGORY_GROUPS, CATEGORY_MAP } from '../lib/categories';
@@ -6,31 +6,25 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-// Flatten categories for search
-const ALL_CATEGORIES = Object.entries(CATEGORY_MAP).map(([id, name]) => ({
-    id,
-    name,
-    searchStr: `${name.toLowerCase()} ${id.toLowerCase()}`
-}));
-
 export default function CategoryBrowser() {
     const [query, setQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState('');
     const [isPending, startTransition] = useTransition();
-    const [isFocused, setIsFocused] = useState(false);
 
-    // Derived state for the dropdown suggestions (search as you type)
-    const suggestions = useMemo(() => {
-        if (!query.trim()) return [];
-        const q = query.toLowerCase();
-        return ALL_CATEGORIES
-            .filter(cat => cat.searchStr.includes(q))
-            .slice(0, 10);
+    // Debounce effect: update activeFilter when query changes after a delay
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            startTransition(() => {
+                setActiveFilter(query);
+            });
+        }, 300);
+
+        return () => clearTimeout(timer);
     }, [query]);
 
     // Derived state for the main list (filtered by activeFilter)
     const filteredGroups = useMemo(() => {
-        const q = activeFilter.toLowerCase();
+        const q = activeFilter.toLowerCase().trim();
         if (!q) return Object.entries(CATEGORY_GROUPS);
 
         return Object.entries(CATEGORY_GROUPS)
@@ -45,23 +39,13 @@ export default function CategoryBrowser() {
             .filter(([_, ids]) => ids.length > 0);
     }, [activeFilter]);
 
-    const handleSearch = (e?: React.FormEvent) => {
-        e?.preventDefault();
-        setIsFocused(false);
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Force immediate update on submit
         startTransition(() => {
             setActiveFilter(query);
         });
     };
-
-    const handleSuggestionClick = (cat: typeof ALL_CATEGORIES[0]) => {
-        setQuery(cat.name); // Or cat.id? Let's use name for display
-        setIsFocused(false);
-        startTransition(() => {
-            setActiveFilter(cat.searchStr);
-        });
-    };
-
-    const showDropdown = isFocused && query && suggestions.length > 0;
 
     return (
         <div className="space-y-12">
@@ -73,52 +57,21 @@ export default function CategoryBrowser() {
                 </div>
 
                 <div className="relative w-full md:w-[400px] z-50">
-                    <form onSubmit={handleSearch} className="relative">
-                         <div className="relative group">
+                    <form onSubmit={handleSearch} className="flex w-full items-center gap-0">
+                         <div className="relative w-full group">
                              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                              <Input
-                                type="text"
+                                type="search"
                                 placeholder="Filter categories..."
-                                className="pl-10 h-10 bg-background focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-colors"
+                                className="pl-10 h-10 bg-background border-r-0 rounded-r-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-colors"
                                 value={query}
-                                onChange={(e) => {
-                                    setQuery(e.target.value);
-                                    if (e.target.value === '') {
-                                        startTransition(() => setActiveFilter(''));
-                                    }
-                                }}
-                                onFocus={() => setIsFocused(true)}
-                                onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Delay to allow click
+                                onChange={(e) => setQuery(e.target.value)}
                              />
                          </div>
+                         <Button type="submit" className="h-10 px-6 rounded-l-none border border-l-0 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all">
+                            Search
+                        </Button>
                     </form>
-
-                    {/* Dropdown Suggestions */}
-                    <AnimatePresence>
-                        {showDropdown && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.2 }}
-                                className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-md shadow-lg overflow-hidden z-50"
-                                style={{ maxHeight: '300px', overflowY: 'auto' }}
-                            >
-                                <div className="p-1">
-                                    {suggestions.map((cat) => (
-                                        <button
-                                            key={cat.id}
-                                            className="w-full text-left px-3 py-2 text-sm hover:bg-primary/10 hover:text-primary rounded-sm flex items-center justify-between group transition-colors"
-                                            onClick={() => handleSuggestionClick(cat)}
-                                        >
-                                            <span className="truncate">{cat.name}</span>
-                                            <span className="text-xs text-muted-foreground group-hover:text-primary/70 font-mono ml-2">{cat.id}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </div>
             </div>
 
