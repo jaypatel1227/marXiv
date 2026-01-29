@@ -24,7 +24,7 @@ if (!paper) {
         <div class="mb-8">
             <Button variant="ghost" size="sm" asChild className="pl-0 hover:pl-0 text-muted-foreground hover:text-primary transition-colors">
                 <a href="javascript:history.back()" class="flex items-center font-mono text-xs tracking-widest uppercase">
-                    <ArrowLeft class="mr-2 h-4 w-4" /> Return_To_Index
+                    <ArrowLeft class="mr-2 h-4 w-4" /> Back
                 </a>
             </Button>
         </div>
@@ -75,13 +75,13 @@ if (!paper) {
                 {paper.pdfLink && (
                     <Button asChild size="lg" className="w-full sm:w-auto font-bold tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)] transition-all">
                         <a href={paper.pdfLink} target="_blank" rel="noopener noreferrer">
-                            <FileText className="mr-2 h-5 w-5" /> INITIATE_DOWNLOAD (PDF)
+                            <FileText className="mr-2 h-5 w-5" /> Download PDF
                         </a>
                     </Button>
                 )}
                 <Button asChild variant="outline" size="lg" className="w-full sm:w-auto font-mono text-xs border-primary/30 text-primary hover:bg-primary/10">
                     <a href={`https://arxiv.org/abs/${paper.shortId}`} target="_blank" rel="noopener noreferrer">
-                        OPEN_SOURCE (ARXIV.ORG)
+                        View on arXiv.org
                     </a>
                 </Button>
             </div>
@@ -93,7 +93,7 @@ if (!paper) {
                 <CardContent className="pt-8 px-8">
                     <h2 class="text-sm font-mono font-bold text-primary mb-6 uppercase tracking-widest flex items-center gap-2">
                         <span class="w-2 h-2 bg-primary"></span>
-                        Abstract // Decrypted_Content
+                        Abstract
                     </h2>
                     <p class="text-muted-foreground leading-7 whitespace-pre-line font-sans text-lg">
                         {paper.summary}

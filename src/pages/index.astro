@@ -3,27 +3,24 @@ import Layout from '../layouts/Layout.astro';
 import InfinitePaperList from '../components/InfinitePaperList';
 import SearchBar from '../components/SearchBar';
 import { searchPapers } from '../lib/arxiv';
+import { DEFAULT_CATEGORY, CATEGORY_MAP } from '../lib/categories';
 
-// Fetch recent CS papers
-const initialQuery = "cat:cs.AI";
+// Fetch recent papers for default category
+const initialQuery = `cat:${DEFAULT_CATEGORY}`;
 const { entries, totalResults } = await searchPapers(initialQuery, 0, 12);
+const defaultCategoryName = CATEGORY_MAP[DEFAULT_CATEGORY];
 ---
 
-<Layout title="Modern arXiv - Home">
+<Layout title="marXiv - Modern arXiv Interface">
 	<div class="container mx-auto px-4 py-8 space-y-12">
 		<section class="flex flex-col items-center justify-center py-16 md:py-24 text-center space-y-6 relative overflow-hidden">
             <div class="absolute inset-0 bg-primary/5 blur-[100px] rounded-full pointer-events-none -z-10"></div>
-			<div class="inline-flex items-center px-3 py-1 rounded-none border border-primary/20 bg-primary/5 text-primary text-xs font-mono mb-4 tracking-widest uppercase">
-				<span class="w-2 h-2 rounded-full bg-primary mr-2 animate-pulse"></span>
-				System Online
-			</div>
-			<h1 class="text-5xl md:text-7xl font-display font-bold tracking-wide uppercase text-transparent bg-clip-text bg-gradient-to-b from-foreground to-foreground/50 leading-[0.9]">
-				Global Knowledge <br />
-				<span class="text-primary">Repository</span>
+
+			<h1 class="text-6xl md:text-9xl font-display font-bold tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-b from-foreground to-foreground/50 leading-[0.9]">
+				marXiv
 			</h1>
-			<p class="text-lg md:text-xl text-muted-foreground max-w-[600px] font-mono border-l-2 border-primary/30 pl-4 text-left md:text-center md:border-l-0 md:pl-0">
-				Secure connection established. Accessing arXiv data uplink. <br class="hidden md:block"/>
-                Begin search sequence or browse latest intelligence streams.
+			<p class="text-xl md:text-2xl text-muted-foreground font-light max-w-[600px]">
+				arXiv, but prettier according to some guy
 			</p>
 			<div class="w-full max-w-lg pt-8 relative z-10">
 				<SearchBar client:load className="w-full drop-shadow-[0_0_15px_hsl(var(--primary)/0.1)]" />
@@ -31,11 +28,11 @@ const { entries, totalResults } = await searchPapers(initialQuery, 0, 12);
 		</section>
 
 		<section>
-			<div class="flex items-center justify-between mb-8 border-b border-primary/20 pb-2">
-				<h2 class="text-2xl font-display font-bold tracking-widest uppercase flex items-center gap-2">
-                    <span class="text-primary">//</span> INCOMING STREAM: AI
+			<div class="flex items-center justify-between mb-8 border-b border-border pb-4">
+				<h2 class="text-2xl font-display font-semibold tracking-wide flex items-center gap-2">
+                    <span class="text-primary">//</span> {defaultCategoryName}
                 </h2>
-				<a href="/categories" class="text-xs font-mono font-bold tracking-widest hover:text-primary transition-colors text-muted-foreground uppercase">[ Access_All_Channels ]</a>
+				<a href="/categories" class="text-sm font-medium hover:text-primary transition-colors text-muted-foreground">View All Categories &rarr;</a>
 			</div>
 
 			<InfinitePaperList

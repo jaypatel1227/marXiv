@@ -24,14 +24,14 @@ export default function SearchBar({ initialQuery = "", className = "" }: SearchB
          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
          <Input
             type="search"
-            placeholder="ENTER_QUERY..."
-            className="pl-10 h-12 bg-background border-r-0 border-primary/20 focus-visible:ring-0 focus-visible:border-primary transition-colors"
+            placeholder="Search papers..."
+            className="pl-10 h-10 bg-background border-r-0 rounded-r-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-colors"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
          />
       </div>
-      <Button type="submit" className="h-12 px-6 border border-l-0 border-primary/20 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all">
-        SEARCH
+      <Button type="submit" className="h-10 px-6 rounded-l-none border border-l-0 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all">
+        Search
       </Button>
     </form>
   );
