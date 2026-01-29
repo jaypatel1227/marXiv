@@ -4,7 +4,6 @@ import { Search } from 'lucide-react';
 import { CATEGORY_GROUPS, CATEGORY_MAP } from '../lib/categories';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 export default function CategoryBrowser() {
     const [query, setQuery] = useState('');
@@ -57,20 +56,17 @@ export default function CategoryBrowser() {
                 </div>
 
                 <div className="relative w-full md:w-[400px] z-50">
-                    <form onSubmit={handleSearch} className="flex w-full items-center gap-0">
+                    <form onSubmit={handleSearch} className="w-full">
                          <div className="relative w-full group">
                              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                              <Input
                                 type="search"
                                 placeholder="Filter categories..."
-                                className="pl-10 h-10 bg-background border-r-0 rounded-r-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-colors"
+                                className="pl-10 h-10 bg-background focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary transition-colors"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                              />
                          </div>
-                         <Button type="submit" className="h-10 px-6 rounded-l-none border border-l-0 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all">
-                            Search
-                        </Button>
                     </form>
                 </div>
             </div>
