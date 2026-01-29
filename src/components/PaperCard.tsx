@@ -42,10 +42,12 @@ export default function PaperCard({ paper }: PaperCardProps) {
                 </span>
              </div>
         </div>
-        <MarkdownRenderer
-          content={paper.summary}
-          className="text-sm text-muted-foreground/80 line-clamp-3 leading-relaxed"
-        />
+        <div className="text-sm text-muted-foreground/80 line-clamp-3 leading-relaxed">
+            <MarkdownRenderer
+              content={paper.summary}
+              components={{ p: 'span' }}
+            />
+        </div>
       </CardContent>
       <CardFooter className="pt-0 gap-3">
         <Button asChild variant="outline" size="sm" className="flex-1">
