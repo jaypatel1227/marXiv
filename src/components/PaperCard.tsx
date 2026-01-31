@@ -56,8 +56,14 @@ export default function PaperCard({ paper }: PaperCardProps) {
             </a>
         </Button>
         {paper.pdfLink && (
-             <Button asChild variant="ghost" size="sm" className="px-3" title="Download PDF">
-                <a href={paper.pdfLink} target="_blank" rel="noopener noreferrer">
+             <Button asChild variant="ghost" size="sm" className="px-3">
+                <a
+                  href={paper.pdfLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Download PDF"
+                  aria-label="Download PDF (opens in new tab)"
+                >
                     <FileText className="h-4 w-4" />
                 </a>
             </Button>
