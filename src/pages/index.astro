@@ -7,7 +7,7 @@ import { DEFAULT_CATEGORY, CATEGORY_MAP } from '../lib/categories';
 
 // Fetch recent papers for default category
 const initialQuery = `cat:${DEFAULT_CATEGORY}`;
-const { entries, totalResults } = await searchPapers(initialQuery, 0, 12);
+const { entries, totalResults } = await searchPapers(initialQuery, 0, 9);
 const defaultCategoryName = CATEGORY_MAP[DEFAULT_CATEGORY];
 ---
 
