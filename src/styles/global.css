@@ -33,58 +33,188 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+:root {
+  /* Default: Research Terminal Theme */
+  --background: 0 0% 2%;
+  --foreground: 214 32% 91%;
+  --card: 240 10% 4%;
+  --card-foreground: 214 32% 91%;
+  --popover: 240 10% 4%;
+  --popover-foreground: 214 32% 91%;
+  --primary: 183 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 215 28% 17%;
+  --secondary-foreground: 214 32% 91%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 183 100% 15%;
+  --accent-foreground: 183 100% 50%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 215 28% 17%;
+  --input: 215 28% 17%;
+  --ring: 183 100% 50%;
+  --radius: 0px;
+
+  /* Default Fonts */
   --font-sans: "Titillium Web", sans-serif;
   --font-display: "Rajdhani", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 }
 
-:root {
-  /* Research Terminal Theme */
-
-  /* Background: Void Black #050505 */
+[data-theme="research"] {
+  /* Explicit Research Terminal Theme (Same as root default) */
   --background: 0 0% 2%;
-  /* Foreground: Slate 200 #e2e8f0 */
   --foreground: 214 32% 91%;
-
-  /* Card: Zinc 950 #09090b */
   --card: 240 10% 4%;
   --card-foreground: 214 32% 91%;
-
-  /* Popover matches card */
   --popover: 240 10% 4%;
   --popover-foreground: 214 32% 91%;
-
-  /* Primary: Neon Cyan #00f3ff */
   --primary: 183 100% 50%;
-  /* Primary FG: Black */
   --primary-foreground: 0 0% 0%;
-
-  /* Secondary: Slate 800 #1e293b */
   --secondary: 215 28% 17%;
   --secondary-foreground: 214 32% 91%;
-
-  /* Muted: Slate 900 #0f172a */
   --muted: 217 33% 17%;
   --muted-foreground: 215 20% 65%;
-
-  /* Accent: Cyan 900/20 (Subtle highlight) */
   --accent: 183 100% 15%;
   --accent-foreground: 183 100% 50%;
-
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-
-  /* Border: Slate 800 #1e293b */
   --border: 215 28% 17%;
   --input: 215 28% 17%;
   --ring: 183 100% 50%;
-
   --radius: 0px;
+}
+
+[data-theme="swiss"] {
+  /* Swiss Paper: Minimalist/Editorial */
+  --background: 0 0% 98%; /* #fbfbfb */
+  --foreground: 0 0% 0%; /* #000000 */
+  --card: 0 0% 100%; /* #ffffff */
+  --card-foreground: 0 0% 0%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 0%;
+  --primary: 0 100% 40%; /* #cc0000 Deep Red */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 0%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 0 100% 95%; /* Light red tint */
+  --accent-foreground: 0 100% 40%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 90%; /* #e5e5e5 */
+  --input: 0 0% 90%;
+  --ring: 0 100% 40%;
+  --radius: 0px;
+}
+
+[data-theme="amber-crt"] {
+  /* Amber CRT: Retro/Lo-fi */
+  --background: 0 0% 2%; /* #050505 */
+  --foreground: 41 100% 50%; /* #ffb000 Amber */
+  --card: 0 0% 4%; /* #0a0a0a */
+  --card-foreground: 41 100% 50%;
+  --popover: 0 0% 4%;
+  --popover-foreground: 41 100% 50%;
+  --primary: 41 100% 50%; /* Amber */
+  --primary-foreground: 0 0% 0%;
+  --secondary: 40 100% 10%; /* Dark Amber/Brown */
+  --secondary-foreground: 41 100% 50%;
+  --muted: 40 100% 8%;
+  --muted-foreground: 41 100% 35%; /* Dim Amber */
+  --accent: 41 100% 15%;
+  --accent-foreground: 41 100% 50%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 40 100% 20%; /* #332200 */
+  --input: 40 100% 20%;
+  --ring: 41 100% 50%;
+  --radius: 0px;
+}
+
+[data-theme="midnight-soup"] {
+  /* Midnight Soup: Soft/Organic */
+  --background: 270 60% 5%; /* #0f0518 Deep Plum */
+  --foreground: 270 50% 90%; /* #e0d0f0 Soft Lavender */
+  --card: 270 60% 11%; /* #1a0b2e */
+  --card-foreground: 270 50% 90%;
+  --popover: 270 60% 11%;
+  --popover-foreground: 270 50% 90%;
+  --primary: 265 100% 69%; /* #a060ff Vibrant Purple */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 270 50% 20%;
+  --secondary-foreground: 270 50% 90%;
+  --muted: 270 50% 15%;
+  --muted-foreground: 270 40% 65%;
+  --accent: 265 100% 20%;
+  --accent-foreground: 265 100% 69%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 270 50% 20%;
+  --input: 270 50% 20%;
+  --ring: 265 100% 69%;
+  --radius: 12px; /* Soft Rounded */
+}
+
+[data-theme="brutalist"] {
+  /* Brutalist Blueprint: Industrial */
+  --background: 220 90% 35%; /* Blueprint Blue */
+  --foreground: 0 0% 100%; /* White */
+  --card: 220 90% 30%; /* Slightly darker blue */
+  --card-foreground: 0 0% 100%;
+  --popover: 220 90% 30%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 0 0% 100%; /* White */
+  --primary-foreground: 220 90% 35%; /* Blue Text on White Button */
+  --secondary: 220 90% 25%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 220 80% 25%;
+  --muted-foreground: 220 60% 80%;
+  --accent: 220 90% 45%; /* Lighter Blue Highlight */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 100%; /* White Borders */
+  --input: 220 90% 30%;
+  --ring: 0 0% 100%;
+  --radius: 0px;
+}
+
+/* Font Variations */
+[data-font="research"] {
+  --font-sans: "Titillium Web", sans-serif;
+  --font-display: "Rajdhani", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+[data-font="editorial"] {
+  --font-sans: "Alice", serif;
+  --font-display: "Playfair Display", serif;
+  --font-mono: "Courier Prime", monospace;
+}
+
+[data-font="raw"] {
+  --font-sans: "Courier Prime", monospace;
+  --font-display: "Courier Prime", monospace;
+  --font-mono: "Courier Prime", monospace;
+}
+
+[data-font="modern-art"] {
+  --font-sans: "Outfit", sans-serif;
+  --font-display: "Syne", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
 @layer base {
   body {
-    @apply bg-background text-foreground antialiased font-sans;
+    @apply bg-background text-foreground antialiased font-sans transition-colors duration-300;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
