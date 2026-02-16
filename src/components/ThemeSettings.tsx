@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Settings, Check, Type, Palette, X, Database, Download, Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Settings, Check, Type, Palette, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useStorage, type Theme, type Font } from '@/hooks/use-storage';
@@ -21,64 +21,19 @@ const fonts = [
 
 export default function ThemeSettings() {
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, font, setTheme, setFont, exportData, importData } = useStorage();
+  const { theme, font, setTheme, setFont } = useStorage();
   const menuRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     // Click outside handler
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        setImportStatus('idle');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleExport = async () => {
-    try {
-        const json = await exportData();
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `marxiv-data-${new Date().toISOString().slice(0, 10)}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    } catch (e) {
-        console.error('Export failed:', e);
-    }
-  };
-
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-        const text = await file.text();
-        await importData(text);
-        setImportStatus('success');
-
-        // Reset file input
-        if (fileInputRef.current) fileInputRef.current.value = '';
-
-        // Reset status after 3s
-        setTimeout(() => setImportStatus('idle'), 3000);
-    } catch (e) {
-        console.error('Import failed:', e);
-        setImportStatus('error');
-        setTimeout(() => setImportStatus('idle'), 3000);
-    }
-  };
-
-  const triggerFileInput = () => {
-      fileInputRef.current?.click();
-  };
 
   return (
     <div className="relative" ref={menuRef}>
@@ -103,7 +58,7 @@ export default function ThemeSettings() {
           >
              <div className="p-4 space-y-6">
                 <div className="flex items-center justify-between pb-2 border-b border-border/50">
-                    <h3 className="font-display font-bold text-lg text-foreground">Appearance & Data</h3>
+                    <h3 className="font-display font-bold text-lg text-foreground">Appearance</h3>
                     <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => setIsOpen(false)}>
                         <X className="h-4 w-4" />
                     </Button>
@@ -168,44 +123,6 @@ export default function ThemeSettings() {
                             </button>
                         ))}
                     </div>
-                </div>
-
-                {/* Data Management */}
-                <div className="space-y-3 pt-2 border-t border-border/50">
-                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                        <Database className="h-4 w-4" />
-                        <span>Data Storage</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                        <Button variant="outline" size="sm" onClick={handleExport} className="w-full gap-2 justify-start h-9">
-                            <Download className="h-3.5 w-3.5" />
-                            Export Data
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={triggerFileInput} className="w-full gap-2 justify-start h-9">
-                            <Upload className="h-3.5 w-3.5" />
-                            Import Data
-                        </Button>
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            className="hidden"
-                            accept=".json"
-                            onChange={handleImport}
-                        />
-                    </div>
-
-                    {importStatus === 'success' && (
-                        <div className="flex items-center gap-2 text-xs text-green-500 bg-green-500/10 p-2 rounded">
-                            <CheckCircle2 className="h-3 w-3" />
-                            Data imported successfully!
-                        </div>
-                    )}
-                    {importStatus === 'error' && (
-                        <div className="flex items-center gap-2 text-xs text-red-500 bg-red-500/10 p-2 rounded">
-                            <AlertCircle className="h-3 w-3" />
-                            Import failed. check file.
-                        </div>
-                    )}
                 </div>
              </div>
 
