@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   getSetting, setSetting,
-  getApiKey, setApiKey,
-  saveNote, getNote,
-  addToReadNext, removeFromReadNext, isInReadNext,
-  exportStorageData, importStorageData
+  exportStorageData, importStorageData,
+  type SettingsSchema
 } from '../lib/storage';
 
 export type Theme = 'research' | 'swiss' | 'amber-crt' | 'midnight-soup' | 'brutalist';
@@ -19,8 +17,8 @@ interface StorageState {
 const STORAGE_EVENT = 'marxiv-storage-update';
 
 export function useStorage() {
-  // Initialize from localStorage to avoid hydration mismatch if possible
-  // and to ensure immediate availability of theme settings
+  // Initialize from localStorage (Cache for FOUC prevention)
+  // This is the "fast path"
   const [state, setState] = useState<StorageState>(() => {
     if (typeof window !== 'undefined') {
       return {
@@ -36,35 +34,19 @@ export function useStorage() {
     };
   });
 
-  // Helper to apply theme to DOM
-  const applyThemeToDOM = useCallback((theme: Theme) => {
-    document.documentElement.setAttribute('data-theme', theme);
-    if (theme === 'swiss') {
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  const applyFontToDOM = useCallback((font: Font) => {
-    document.documentElement.setAttribute('data-font', font);
-  }, []);
-
-  // Sync with IndexedDB on mount
+  // Sync with IndexedDB on mount (Source of Truth)
+  // If IDB differs from localStorage, IDB wins (eventually)
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const storedTheme = await getSetting<Theme>('theme');
         const storedFont = await getSetting<Font>('font');
 
-        // We only update if the DB has a value and it differs from the initial local state
-        // We use functional updates or refs if we needed current state, but here we just want to apply
-        // the DB value if it exists, assuming DB is the source of truth for "restored session"
         if (storedTheme) {
             setState(s => {
                 if (s.theme !== storedTheme) {
                     applyThemeToDOM(storedTheme);
-                    localStorage.setItem('theme', storedTheme);
+                    localStorage.setItem('theme', storedTheme); // Update cache
                     return { ...s, theme: storedTheme };
                 }
                 return s;
@@ -74,7 +56,7 @@ export function useStorage() {
             setState(s => {
                 if (s.font !== storedFont) {
                     applyFontToDOM(storedFont);
-                    localStorage.setItem('font', storedFont);
+                    localStorage.setItem('font', storedFont); // Update cache
                     return { ...s, font: storedFont };
                 }
                 return s;
@@ -88,6 +70,20 @@ export function useStorage() {
     };
 
     loadSettings();
+  }, []);
+
+  // Helper to apply theme to DOM
+  const applyThemeToDOM = useCallback((theme: Theme) => {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (theme === 'swiss') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  const applyFontToDOM = useCallback((font: Font) => {
+    document.documentElement.setAttribute('data-font', font);
   }, []);
 
   // Listen for storage updates from other components/tabs
@@ -111,8 +107,12 @@ export function useStorage() {
     setState(s => ({ ...s, theme: newTheme }));
     applyThemeToDOM(newTheme);
 
+    // Update Cache (localStorage) for FOUC prevention
     localStorage.setItem('theme', newTheme);
+
+    // Update Source of Truth (IndexedDB)
     setSetting('theme', newTheme).catch(console.error);
+
     window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key: 'theme', value: newTheme } }));
   }, [applyThemeToDOM]);
 
@@ -120,40 +120,25 @@ export function useStorage() {
     setState(s => ({ ...s, font: newFont }));
     applyFontToDOM(newFont);
 
+    // Update Cache
     localStorage.setItem('font', newFont);
+
+    // Update Source of Truth
     setSetting('font', newFont).catch(console.error);
+
     window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key: 'font', value: newFont } }));
   }, [applyFontToDOM]);
 
-  // API Key helpers
-  const updateApiKey = useCallback(async (provider: string, key: string) => {
-    await setApiKey(provider, key);
+  // Generic Helpers for future expansion (Notes, Read Next, API Keys)
+  // We expose specific typed helpers if needed, or generic ones.
+  // Given "Do not make the schema for all of the new objects", let's keep it simple.
+
+  const updateSetting = useCallback(async <K extends keyof SettingsSchema>(key: K, value: SettingsSchema[K]) => {
+      await setSetting(key, value);
   }, []);
 
-  const getApiKeyValue = useCallback(async (provider: string) => {
-    return getApiKey(provider);
-  }, []);
-
-  // Note helpers
-  const savePaperNote = useCallback(async (paperId: string, content: string) => {
-      await saveNote(paperId, content);
-  }, []);
-
-  const getPaperNote = useCallback(async (paperId: string) => {
-      return getNote(paperId);
-  }, []);
-
-  // Read Next helpers
-  const addToReadList = useCallback(async (paperId: string, title: string, metadata?: any) => {
-      await addToReadNext(paperId, title, metadata);
-  }, []);
-
-  const removeFromReadList = useCallback(async (paperId: string) => {
-      await removeFromReadNext(paperId);
-  }, []);
-
-  const isPaperInReadList = useCallback(async (paperId: string) => {
-      return isInReadNext(paperId);
+  const getSettingValue = useCallback(async <K extends keyof SettingsSchema>(key: K) => {
+      return getSetting(key);
   }, []);
 
   // Export/Import
@@ -174,13 +159,8 @@ export function useStorage() {
     ...state,
     setTheme,
     setFont,
-    setApiKey: updateApiKey,
-    getApiKey: getApiKeyValue,
-    saveNote: savePaperNote,
-    getNote: getPaperNote,
-    addToReadNext: addToReadList,
-    removeFromReadNext: removeFromReadList,
-    isInReadNext: isPaperInReadList,
+    updateSetting,
+    getSettingValue,
     exportData,
     importData,
   };

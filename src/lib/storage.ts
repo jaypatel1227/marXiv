@@ -1,53 +1,48 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 
+// 1. Define the full Settings Schema
+export interface SettingsSchema {
+  theme: 'research' | 'swiss' | 'amber-crt' | 'midnight-soup' | 'brutalist';
+  font: 'research' | 'editorial' | 'raw' | 'modern-art';
+  // Use generic records for now as requested ("do not make the schema for all of the new objects")
+  // but typed enough to be useful
+  notes: Record<string, { content: string; updatedAt: number }>;
+  readNext: string[]; // List of paper IDs
+  apiKeys: Record<string, string>; // provider -> key
+  // Allow extensibility
+  [key: string]: any;
+}
+
 interface MarxivDB extends DBSchema {
   settings: {
     key: string;
     value: any;
   };
-  notes: {
-    key: string; // paperId
-    value: {
-      paperId: string;
-      content: string;
-      updatedAt: number;
-    };
-  };
-  read_next: {
-    key: string; // paperId
-    value: {
-      paperId: string;
-      title: string;
-      addedAt: number;
-      [key: string]: any;
-    };
-  };
-  api_keys: {
-    key: string; // provider (e.g., 'openai')
-    value: string;
-  };
 }
 
 const DB_NAME = 'marxiv-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2; // Bump version to force migration/re-creation if needed
 
 let dbPromise: Promise<IDBPDatabase<MarxivDB>>;
 
 export function initDB() {
   if (!dbPromise) {
     dbPromise = openDB<MarxivDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains('settings')) {
-          db.createObjectStore('settings');
-        }
-        if (!db.objectStoreNames.contains('notes')) {
-          db.createObjectStore('notes');
-        }
-        if (!db.objectStoreNames.contains('read_next')) {
-          db.createObjectStore('read_next');
-        }
-        if (!db.objectStoreNames.contains('api_keys')) {
-          db.createObjectStore('api_keys');
+      upgrade(db, oldVersion, newVersion, transaction) {
+        // Migration strategy: simpler to just recreate for this pivot
+        // In a real app with users, we'd read old stores and migrate data.
+        // Since "no users yet", we can be aggressive.
+
+        if (oldVersion < 2) {
+            // Delete old stores if they exist
+            if (db.objectStoreNames.contains('notes')) db.deleteObjectStore('notes');
+            if (db.objectStoreNames.contains('read_next')) db.deleteObjectStore('read_next');
+            if (db.objectStoreNames.contains('api_keys')) db.deleteObjectStore('api_keys');
+
+            // Ensure settings store exists
+            if (!db.objectStoreNames.contains('settings')) {
+                db.createObjectStore('settings');
+            }
         }
       },
     });
@@ -55,124 +50,48 @@ export function initDB() {
   return dbPromise;
 }
 
-// Settings
-export async function getSetting<T = any>(key: string): Promise<T | undefined> {
+// Generic Typed Getter
+export async function getSetting<K extends keyof SettingsSchema>(key: K): Promise<SettingsSchema[K] | undefined> {
   const db = await initDB();
-  return db.get('settings', key);
+  return db.get('settings', key as string);
 }
 
-export async function setSetting(key: string, value: any): Promise<void> {
+// Generic Typed Setter
+export async function setSetting<K extends keyof SettingsSchema>(key: K, value: SettingsSchema[K]): Promise<void> {
   const db = await initDB();
-  await db.put('settings', value, key);
+  await db.put('settings', value, key as string);
 }
 
-// API Keys
-export async function getApiKey(provider: string): Promise<string | undefined> {
-  const db = await initDB();
-  return db.get('api_keys', provider);
-}
-
-export async function setApiKey(provider: string, key: string): Promise<void> {
-  const db = await initDB();
-  await db.put('api_keys', key, provider);
-}
-
-// Notes
-export async function getNote(paperId: string) {
-  const db = await initDB();
-  return db.get('notes', paperId);
-}
-
-export async function saveNote(paperId: string, content: string): Promise<void> {
-  const db = await initDB();
-  await db.put('notes', {
-    paperId,
-    content,
-    updatedAt: Date.now(),
-  }, paperId);
-}
-
-export async function getAllNotes() {
-  const db = await initDB();
-  return db.getAll('notes');
-}
-
-// Read Next
-export async function addToReadNext(paperId: string, title: string, metadata: any = {}): Promise<void> {
-  const db = await initDB();
-  await db.put('read_next', {
-    paperId,
-    title,
-    addedAt: Date.now(),
-    ...metadata,
-  }, paperId);
-}
-
-export async function removeFromReadNext(paperId: string): Promise<void> {
-  const db = await initDB();
-  await db.delete('read_next', paperId);
-}
-
-export async function getReadNextList() {
-  const db = await initDB();
-  return db.getAll('read_next');
-}
-
-export async function isInReadNext(paperId: string): Promise<boolean> {
-  const db = await initDB();
-  const item = await db.get('read_next', paperId);
-  return !!item;
-}
-
-// Export/Import
+// Export Helper
 export async function exportStorageData(): Promise<string> {
   const db = await initDB();
+  const keys = await db.getAllKeys('settings');
+  const values = await db.getAll('settings');
+
   const data: Record<string, any> = {};
-
-  const stores = ['settings', 'notes', 'read_next', 'api_keys'] as const;
-
-  for (const store of stores) {
-    const keys = await db.getAllKeys(store);
-    const values = await db.getAll(store);
-    data[store] = keys.map((key, i) => ({ key, value: values[i] }));
-  }
+  keys.forEach((key, index) => {
+    data[key as string] = values[index];
+  });
 
   return JSON.stringify(data, null, 2);
 }
 
+// Import Helper
 export async function importStorageData(jsonString: string): Promise<void> {
   try {
     const data = JSON.parse(jsonString);
     const db = await initDB();
-    const stores = ['settings', 'notes', 'read_next', 'api_keys'] as const;
+    const tx = db.transaction('settings', 'readwrite');
+    const store = tx.objectStore('settings');
 
-    // We use a transaction for atomicity per store, or global if possible.
-    // idb's transaction handling is a bit specific, let's just do sequential puts for simplicity
-    // or create one transaction for all stores.
+    // Clear existing settings or merge?
+    // Usually import implies "restore state", so clear might be safer to avoid ghosts,
+    // but merging is safer for preserving existing data.
+    // Let's clear to be clean as per previous logic.
+    await store.clear();
 
-    const tx = db.transaction(stores, 'readwrite');
-
-    for (const storeName of stores) {
-      if (data[storeName] && Array.isArray(data[storeName])) {
-        const store = tx.objectStore(storeName);
-        // Clear existing data? The requirement didn't specify, but import usually implies restore.
-        // Let's clear to avoid stale data mixing with imported data,
-        // OR we can merge. Merging is safer for "adding" data, clearing is better for "restoring backup".
-        // Given "Export import of all settings", it feels like a backup/restore.
-        // I will clear the store first.
-        await store.clear();
-
-        for (const item of data[storeName]) {
-            // Check if item has key/value structure from our export
-            if (item && typeof item === 'object' && 'key' in item && 'value' in item) {
-                 // For stores where we use out-of-line keys (settings, api_keys), we need the key.
-                 // For stores with in-line keys (notes, read_next), the key is in the value (paperId),
-                 // but we also passed it as the key argument in put().
-                 // Our export format { key, value } works for both `put(value, key)`.
-                 await store.put(item.value, item.key);
-            }
-        }
-      }
+    for (const [key, value] of Object.entries(data)) {
+        await store.put(value, key);
     }
 
     await tx.done;
