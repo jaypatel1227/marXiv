@@ -11,7 +11,7 @@ const { entries, totalResults } = await searchPapers(initialQuery, 0, 9);
 const defaultCategoryName = CATEGORY_MAP[DEFAULT_CATEGORY];
 ---
 
-<Layout title="marXiv - Modern arXiv Interface">
+<Layout title="marXiv - Modern arXiv Interface" isHome={true}>
 	<div class="container mx-auto px-4 py-8 space-y-12">
 		<section class="flex flex-col items-center justify-center py-16 md:py-24 text-center space-y-6 relative overflow-hidden">
             <div class="absolute inset-0 bg-primary/5 blur-[100px] rounded-full pointer-events-none -z-10"></div>
@@ -22,7 +22,7 @@ const defaultCategoryName = CATEGORY_MAP[DEFAULT_CATEGORY];
 			<p class="text-xl md:text-2xl text-muted-foreground font-light max-w-[600px]">
 				arXiv, but prettier according to some guy
 			</p>
-			<div class="w-full max-w-lg pt-8 relative z-10">
+			<div id="hero-search" class="w-full max-w-lg pt-8 relative z-10">
 				<SearchBar client:load className="w-full drop-shadow-[0_0_15px_hsl(var(--primary)/0.1)]" />
 			</div>
 		</section>
