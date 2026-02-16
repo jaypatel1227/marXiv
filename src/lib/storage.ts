@@ -7,11 +7,6 @@ export type Font = 'research' | 'editorial' | 'raw' | 'modern-art';
 export interface SettingsSchema {
   theme: Theme;
   font: Font;
-  // Use generic records for now as requested ("do not make the schema for all of the new objects")
-  // but typed enough to be useful
-  notes: Record<string, { content: string; updatedAt: number }>;
-  readNext: string[]; // List of paper IDs
-  apiKeys: Record<string, string>; // provider -> key
 }
 
 interface MarxivDB extends DBSchema {
