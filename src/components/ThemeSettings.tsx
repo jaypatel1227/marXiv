@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Settings, Check, Type, Palette, X } from 'lucide-react';
+import { Settings, Check, Type, Palette, X, Database, Download, Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { useStorage, type Theme, type Font } from '@/hooks/use-storage';
 
 const themes = [
   { id: 'research', name: 'Research Terminal', color: '#00f3ff', preview: 'bg-[#050505] border-[#00f3ff]' },
@@ -20,46 +21,63 @@ const fonts = [
 
 export default function ThemeSettings() {
   const [isOpen, setIsOpen] = useState(false);
-  const [theme, setTheme] = useState('research');
-  const [font, setFont] = useState('research');
+  const { theme, font, setTheme, setFont, exportData, importData } = useStorage();
   const menuRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   useEffect(() => {
-    // Initialize state from localStorage
-    const savedTheme = localStorage.getItem('theme') || 'research';
-    const savedFont = localStorage.getItem('font') || 'research';
-    setTheme(savedTheme);
-    setFont(savedFont);
-
-    // Ensure DOM is synced (in case script missed something or for hydration)
-    applyTheme(savedTheme);
-    applyFont(savedFont);
-
     // Click outside handler
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setImportStatus('idle');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const applyTheme = (newTheme: string) => {
-    document.documentElement.setAttribute('data-theme', newTheme);
-    if (newTheme === 'swiss') {
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
+  const handleExport = async () => {
+    try {
+        const json = await exportData();
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `marxiv-data-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error('Export failed:', e);
     }
-    localStorage.setItem('theme', newTheme);
-    setTheme(newTheme);
   };
 
-  const applyFont = (newFont: string) => {
-    document.documentElement.setAttribute('data-font', newFont);
-    localStorage.setItem('font', newFont);
-    setFont(newFont);
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+        const text = await file.text();
+        await importData(text);
+        setImportStatus('success');
+
+        // Reset file input
+        if (fileInputRef.current) fileInputRef.current.value = '';
+
+        // Reset status after 3s
+        setTimeout(() => setImportStatus('idle'), 3000);
+    } catch (e) {
+        console.error('Import failed:', e);
+        setImportStatus('error');
+        setTimeout(() => setImportStatus('idle'), 3000);
+    }
+  };
+
+  const triggerFileInput = () => {
+      fileInputRef.current?.click();
   };
 
   return (
@@ -81,11 +99,11 @@ export default function ThemeSettings() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl z-50 overflow-hidden"
+            className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl z-50 overflow-hidden max-h-[80vh] overflow-y-auto"
           >
              <div className="p-4 space-y-6">
                 <div className="flex items-center justify-between pb-2 border-b border-border/50">
-                    <h3 className="font-display font-bold text-lg text-foreground">Appearance</h3>
+                    <h3 className="font-display font-bold text-lg text-foreground">Appearance & Data</h3>
                     <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => setIsOpen(false)}>
                         <X className="h-4 w-4" />
                     </Button>
@@ -101,7 +119,7 @@ export default function ThemeSettings() {
                         {themes.map((t) => (
                             <button
                                 key={t.id}
-                                onClick={() => applyTheme(t.id)}
+                                onClick={() => setTheme(t.id as Theme)}
                                 className={`group relative flex flex-col items-center justify-center gap-2 p-3 rounded-lg border transition-all duration-200 ${
                                     theme === t.id
                                     ? 'border-primary bg-primary/10 shadow-[0_0_15px_-3px_rgba(var(--primary),0.3)]'
@@ -133,7 +151,7 @@ export default function ThemeSettings() {
                         {fonts.map((f) => (
                             <button
                                 key={f.id}
-                                onClick={() => applyFont(f.id)}
+                                onClick={() => setFont(f.id as Font)}
                                 className={`w-full flex items-center justify-between p-2.5 rounded-lg border transition-all duration-200 ${
                                     font === f.id
                                     ? 'border-primary bg-primary/10'
@@ -150,6 +168,44 @@ export default function ThemeSettings() {
                             </button>
                         ))}
                     </div>
+                </div>
+
+                {/* Data Management */}
+                <div className="space-y-3 pt-2 border-t border-border/50">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                        <Database className="h-4 w-4" />
+                        <span>Data Storage</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        <Button variant="outline" size="sm" onClick={handleExport} className="w-full gap-2 justify-start h-9">
+                            <Download className="h-3.5 w-3.5" />
+                            Export Data
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={triggerFileInput} className="w-full gap-2 justify-start h-9">
+                            <Upload className="h-3.5 w-3.5" />
+                            Import Data
+                        </Button>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept=".json"
+                            onChange={handleImport}
+                        />
+                    </div>
+
+                    {importStatus === 'success' && (
+                        <div className="flex items-center gap-2 text-xs text-green-500 bg-green-500/10 p-2 rounded">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Data imported successfully!
+                        </div>
+                    )}
+                    {importStatus === 'error' && (
+                        <div className="flex items-center gap-2 text-xs text-red-500 bg-red-500/10 p-2 rounded">
+                            <AlertCircle className="h-3 w-3" />
+                            Import failed. check file.
+                        </div>
+                    )}
                 </div>
              </div>
 
