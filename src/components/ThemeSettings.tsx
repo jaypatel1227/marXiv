@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Settings, Check, Type, Palette, X } from 'lucide-react';
+import { Settings, Check, Type, Palette, X, ChevronRight, Database } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useStorage, type Theme, type Font } from '@/hooks/use-storage';
@@ -123,6 +123,20 @@ export default function ThemeSettings() {
                             </button>
                         ))}
                     </div>
+                </div>
+
+                {/* Advanced Settings Link */}
+                <div className="pt-2 border-t border-border/50">
+                    <a
+                        href="/settings"
+                        className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors text-sm font-medium text-muted-foreground hover:text-foreground group"
+                    >
+                        <div className="flex items-center gap-2">
+                            <Database className="h-4 w-4" />
+                            <span>Advanced Settings</span>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-foreground transition-colors" />
+                    </a>
                 </div>
              </div>
 
