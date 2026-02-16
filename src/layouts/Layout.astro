@@ -8,12 +8,12 @@ import { Github } from 'lucide-react';
 
 interface Props {
 	title: string;
+    isHome?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, isHome } = Astro.props;
 
 const { pathname } = Astro.url;
-const isHome = pathname === '/' || pathname === '';
 
 // Enhanced mask for home page to fade out grid around the text (center hole)
 // while keeping the original top-down fade for other pages
@@ -66,7 +66,10 @@ const maskImage = isHome
                 </div>
 
                 <div class="flex items-center gap-4 flex-1 justify-end">
-                    <div class="w-full max-w-sm hidden sm:block">
+                    <div
+                        id="header-search-container"
+                        class={`w-full max-w-sm hidden sm:block transition-opacity duration-300 ease-in-out ${isHome ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}
+                    >
                         <SearchBar client:load className="w-full" />
                     </div>
                     <ThemeSettings client:load />
@@ -94,5 +97,10 @@ const maskImage = isHome
                 </div>
             </div>
         </footer>
+
+        <script>
+            import { initSearchToggle } from '../scripts/search-toggle';
+            initSearchToggle();
+        </script>
 	</body>
 </html>
