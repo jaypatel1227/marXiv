@@ -1,48 +1,37 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 
+export type Theme = 'research' | 'swiss' | 'amber-crt' | 'midnight-soup' | 'brutalist';
+export type Font = 'research' | 'editorial' | 'raw' | 'modern-art';
+
 // 1. Define the full Settings Schema
 export interface SettingsSchema {
-  theme: 'research' | 'swiss' | 'amber-crt' | 'midnight-soup' | 'brutalist';
-  font: 'research' | 'editorial' | 'raw' | 'modern-art';
+  theme: Theme;
+  font: Font;
   // Use generic records for now as requested ("do not make the schema for all of the new objects")
   // but typed enough to be useful
   notes: Record<string, { content: string; updatedAt: number }>;
   readNext: string[]; // List of paper IDs
   apiKeys: Record<string, string>; // provider -> key
-  // Allow extensibility
-  [key: string]: any;
 }
 
 interface MarxivDB extends DBSchema {
   settings: {
     key: string;
-    value: any;
+    value: SettingsSchema[keyof SettingsSchema];
   };
 }
 
 const DB_NAME = 'marxiv-db';
-const DB_VERSION = 2; // Bump version to force migration/re-creation if needed
+const DB_VERSION = 1;
 
 let dbPromise: Promise<IDBPDatabase<MarxivDB>>;
 
 export function initDB() {
   if (!dbPromise) {
     dbPromise = openDB<MarxivDB>(DB_NAME, DB_VERSION, {
-      upgrade(db, oldVersion, newVersion, transaction) {
-        // Migration strategy: simpler to just recreate for this pivot
-        // In a real app with users, we'd read old stores and migrate data.
-        // Since "no users yet", we can be aggressive.
-
-        if (oldVersion < 2) {
-            // Delete old stores if they exist
-            if (db.objectStoreNames.contains('notes')) db.deleteObjectStore('notes');
-            if (db.objectStoreNames.contains('read_next')) db.deleteObjectStore('read_next');
-            if (db.objectStoreNames.contains('api_keys')) db.deleteObjectStore('api_keys');
-
-            // Ensure settings store exists
-            if (!db.objectStoreNames.contains('settings')) {
-                db.createObjectStore('settings');
-            }
+      upgrade(db) {
+        if (!db.objectStoreNames.contains('settings')) {
+          db.createObjectStore('settings');
         }
       },
     });
@@ -53,7 +42,7 @@ export function initDB() {
 // Generic Typed Getter
 export async function getSetting<K extends keyof SettingsSchema>(key: K): Promise<SettingsSchema[K] | undefined> {
   const db = await initDB();
-  return db.get('settings', key as string);
+  return db.get('settings', key as string) as Promise<SettingsSchema[K] | undefined>;
 }
 
 // Generic Typed Setter
@@ -84,14 +73,13 @@ export async function importStorageData(jsonString: string): Promise<void> {
     const tx = db.transaction('settings', 'readwrite');
     const store = tx.objectStore('settings');
 
-    // Clear existing settings or merge?
-    // Usually import implies "restore state", so clear might be safer to avoid ghosts,
-    // but merging is safer for preserving existing data.
-    // Let's clear to be clean as per previous logic.
+    // Clear existing settings to avoid ghosts
     await store.clear();
 
     for (const [key, value] of Object.entries(data)) {
-        await store.put(value, key);
+        // We can't easily validate generic import data against the schema at runtime without Zod/etc.
+        // so we cast to any for the put, trusting the source or the interface usage.
+        await store.put(value as any, key);
     }
 
     await tx.done;
