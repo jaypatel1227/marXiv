@@ -60,6 +60,16 @@ This is a modern arXiv browser built with **Astro**, **React**, and **Tailwind C
 - Use `src/lib/arxiv.ts` for all arXiv API interactions.
 - Respect API rate limits.
 
+### 6. Client-Side Storage
+- **Primary Source of Truth:** Use **IndexedDB** (via `idb` library) for all user data (settings, notes, lists).
+- **Architecture:**
+  - Single `settings` object store containing key-value pairs.
+  - Strictly typed via `SettingsSchema` in `src/lib/storage.ts`.
+- **FOUC Prevention:**
+  - `localStorage` is used **only** as a synchronous cache for `theme` and `font` settings to prevent Flash of Unstyled Content.
+  - The `useStorage` hook (`src/hooks/use-storage.ts`) manages synchronization: it initializes state from `localStorage` (fast path) and then reconciles with IndexedDB (authoritative path).
+- **Access Pattern:** Use the `useStorage` hook for React components. Avoid direct DB calls in UI components.
+
 ## 🛠️ Development
 
 To start the development server:
