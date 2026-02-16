@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -23,7 +24,7 @@ const preprocessLaTeX = (content: string) => {
 };
 
 export default function MarkdownRenderer({ content, className, components }: MarkdownRendererProps) {
-  const processedContent = preprocessLaTeX(content);
+  const processedContent = useMemo(() => preprocessLaTeX(content), [content]);
 
   return (
     <ReactMarkdown
