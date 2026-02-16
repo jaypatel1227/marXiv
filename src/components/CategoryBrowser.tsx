@@ -55,7 +55,7 @@ export default function CategoryBrowser() {
                     <p className="text-muted-foreground text-lg mt-2">Browse papers by subject domain</p>
                 </div>
 
-                <div className="relative w-full md:w-[400px] z-50">
+                <div className="relative w-full md:w-[400px] z-10">
                     <form onSubmit={handleSearch} className="w-full">
                          <div className="relative w-full group">
                              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
