@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Settings, Check, Type, Palette, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { useStorage, type Theme, type Font } from '@/hooks/use-storage';
 
 const themes = [
   { id: 'research', name: 'Research Terminal', color: '#00f3ff', preview: 'bg-[#050505] border-[#00f3ff]' },
@@ -20,21 +21,10 @@ const fonts = [
 
 export default function ThemeSettings() {
   const [isOpen, setIsOpen] = useState(false);
-  const [theme, setTheme] = useState('research');
-  const [font, setFont] = useState('research');
+  const { theme, font, setTheme, setFont } = useStorage();
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Initialize state from localStorage
-    const savedTheme = localStorage.getItem('theme') || 'research';
-    const savedFont = localStorage.getItem('font') || 'research';
-    setTheme(savedTheme);
-    setFont(savedFont);
-
-    // Ensure DOM is synced (in case script missed something or for hydration)
-    applyTheme(savedTheme);
-    applyFont(savedFont);
-
     // Click outside handler
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -44,23 +34,6 @@ export default function ThemeSettings() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const applyTheme = (newTheme: string) => {
-    document.documentElement.setAttribute('data-theme', newTheme);
-    if (newTheme === 'swiss') {
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-    }
-    localStorage.setItem('theme', newTheme);
-    setTheme(newTheme);
-  };
-
-  const applyFont = (newFont: string) => {
-    document.documentElement.setAttribute('data-font', newFont);
-    localStorage.setItem('font', newFont);
-    setFont(newFont);
-  };
 
   return (
     <div className="relative" ref={menuRef}>
@@ -81,7 +54,7 @@ export default function ThemeSettings() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl z-50 overflow-hidden"
+            className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl z-50 overflow-hidden max-h-[80vh] overflow-y-auto"
           >
              <div className="p-4 space-y-6">
                 <div className="flex items-center justify-between pb-2 border-b border-border/50">
@@ -101,7 +74,7 @@ export default function ThemeSettings() {
                         {themes.map((t) => (
                             <button
                                 key={t.id}
-                                onClick={() => applyTheme(t.id)}
+                                onClick={() => setTheme(t.id as Theme)}
                                 className={`group relative flex flex-col items-center justify-center gap-2 p-3 rounded-lg border transition-all duration-200 ${
                                     theme === t.id
                                     ? 'border-primary bg-primary/10 shadow-[0_0_15px_-3px_rgba(var(--primary),0.3)]'
@@ -133,7 +106,7 @@ export default function ThemeSettings() {
                         {fonts.map((f) => (
                             <button
                                 key={f.id}
-                                onClick={() => applyFont(f.id)}
+                                onClick={() => setFont(f.id as Font)}
                                 className={`w-full flex items-center justify-between p-2.5 rounded-lg border transition-all duration-200 ${
                                     font === f.id
                                     ? 'border-primary bg-primary/10'
