@@ -17,19 +17,22 @@ This is a modern arXiv browser built with **Astro**, **React**, and **Tailwind C
 ### Directory Structure
 - `src/components/`: React UI components.
   - `ui/`: Reusable primitive components.
+  - `AdvancedSettings.tsx`: Full-page advanced configuration.
   - `CategoryBrowser.tsx`: Browser for arXiv categories.
   - `InfinitePaperList.tsx`: Infinite scroll list for papers.
   - `MarkdownRenderer.tsx`: Renders markdown/LaTeX content.
   - `PaperCard.tsx`: Displays individual paper details.
   - `SearchBar.tsx`: Search interface.
-  - `ThemeSettings.tsx`: Controls for themes and fonts.
+  - `ThemeSettings.tsx`: Controls for themes and fonts (popup).
 - `src/layouts/`: Astro layouts (e.g., `Layout.astro`).
 - `src/pages/`: Astro file-based routing.
   - `api/`: API endpoints.
   - `paper/`: Paper detail pages.
+  - `settings.astro`: Advanced settings page.
 - `src/lib/`: Business logic and utilities.
   - `arxiv.ts`: Handles fetching data from the arXiv API.
   - `categories.ts`: Definitions for paper categories.
+  - `storage.ts`: IndexedDB wrapper for settings persistence.
   - `utils.ts`: General helper functions.
 
 ## 🚀 Best Practices & Guidelines
@@ -56,7 +59,14 @@ This is a modern arXiv browser built with **Astro**, **React**, and **Tailwind C
 - Utilize the Tailwind v4 configuration in `src/styles/global.css` (using `@theme`).
 - Keep styles consistent with the existing design system (dark mode, typography).
 
-### 5. Fetching Data
+### 5. Settings & Configuration
+- **Quick Settings:** The `ThemeSettings` component (popup) is for quick, frequent adjustments (e.g., toggling theme or font).
+- **Advanced Settings:** The `/settings` page (`AdvancedSettings` component) is the home for comprehensive configuration.
+  - It should include all available settings, including those in the quick popup.
+  - It is the exclusive location for data management tasks (Export/Import of IndexedDB data).
+  - Any future complex configurations (e.g., API keys, advanced filtering defaults) should be added here.
+
+### 6. Fetching Data
 - Use `src/lib/arxiv.ts` for all arXiv API interactions.
 - Respect API rate limits.
 
