@@ -4,7 +4,7 @@ import 'katex/dist/katex.min.css';
 import SearchBar from '../components/SearchBar';
 import ThemeSettings from '../components/ThemeSettings';
 import { Button } from '@/components/ui/button';
-import { Github } from 'lucide-react';
+import { Github, Home } from 'lucide-react';
 
 interface Props {
 	title: string;
@@ -14,6 +14,8 @@ interface Props {
 const { title, isHome } = Astro.props;
 
 const { pathname } = Astro.url;
+
+const isSettingsPage = pathname === '/settings';
 
 // Enhanced mask for home page to fade out grid around the text (center hole)
 // while keeping the original top-down fade for other pages
@@ -72,7 +74,15 @@ const maskImage = isHome
                     >
                         <SearchBar client:load className="w-full" />
                     </div>
-                    <ThemeSettings client:load />
+                    {isSettingsPage ? (
+                        <Button variant="ghost" size="icon" asChild className="text-muted-foreground hover:text-primary transition-colors">
+                            <a href="/" aria-label="Go to Home">
+                                <Home className="h-5 w-5" />
+                            </a>
+                        </Button>
+                    ) : (
+                        <ThemeSettings client:load />
+                    )}
                     <Button variant="ghost" size="icon" asChild className="hidden sm:inline-flex text-muted-foreground hover:text-primary">
                         <a href="https://github.com/jaypatel1227/marXiv" target="_blank" rel="noopener noreferrer">
                             <Github className="h-5 w-5" />

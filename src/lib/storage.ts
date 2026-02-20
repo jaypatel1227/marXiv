@@ -49,15 +49,36 @@ export async function setSetting<K extends keyof SettingsSchema>(key: K, value: 
 // Export Helper
 export async function exportStorageData(): Promise<string> {
   const db = await initDB();
+
+  // We explicitly fetch known settings to ensure they are included even if not explicitly set (using defaults)
+  // Or we fetch all keys and restructure them.
+  // The user requested `theme` and `font` specifically be wrapped in `personalization`.
+
+  const theme = await getSetting('theme') || 'research';
+  const font = await getSetting('font') || 'research';
+
+  // Get any other keys that might exist in the future (though schema is strict right now, IDB is loose)
   const keys = await db.getAllKeys('settings');
   const values = await db.getAll('settings');
 
-  const data: Record<string, any> = {};
+  const otherData: Record<string, any> = {};
+
   keys.forEach((key, index) => {
-    data[key as string] = values[index];
+    const k = key as string;
+    if (k !== 'theme' && k !== 'font') {
+        otherData[k] = values[index];
+    }
   });
 
-  return JSON.stringify(data, null, 2);
+  const exportData = {
+      personalization: {
+          theme,
+          font
+      },
+      ...otherData
+  };
+
+  return JSON.stringify(exportData, null, 2);
 }
 
 // Import Helper
@@ -71,9 +92,20 @@ export async function importStorageData(jsonString: string): Promise<void> {
     // Clear existing settings to avoid ghosts
     await store.clear();
 
+    // Handle nested personalization object
+    if (data.personalization) {
+        if (data.personalization.theme) {
+            await store.put(data.personalization.theme, 'theme');
+        }
+        if (data.personalization.font) {
+            await store.put(data.personalization.font, 'font');
+        }
+        // Remove it so we don't double import if we iterate
+        delete data.personalization;
+    }
+
+    // Import remaining keys
     for (const [key, value] of Object.entries(data)) {
-        // We can't easily validate generic import data against the schema at runtime without Zod/etc.
-        // so we cast to any for the put, trusting the source or the interface usage.
         await store.put(value as any, key);
     }
 
