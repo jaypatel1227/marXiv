@@ -18,7 +18,7 @@ interface StorageState {
 }
 
 const STORAGE_EVENT = 'marxiv-storage-update';
-const DEFAULT_MODEL = 'google/gemini-2.0-flash-001';
+const DEFAULT_MODEL = '';
 
 export function useStorage() {
   // Initialize from localStorage (Cache for FOUC prevention)

@@ -59,18 +59,20 @@ export default function AdvancedSettings() {
 
     if (index >= 0) {
         if (!newKey) {
-            // Remove if empty? Or keep as empty string? Keeping as empty string preserves position but maybe we should remove.
-            // Let's update it.
-             newCredentials[index] = { ...newCredentials[index], key: newKey };
+             newCredentials.splice(index, 1);
         } else {
              newCredentials[index] = { ...newCredentials[index], key: newKey };
         }
-    } else {
+    } else if (newKey) {
         newCredentials.push({ provider: provider as any, key: newKey });
     }
-    // Filter out empty keys if desired? No, let's keep them so user can clear field.
-    // Actually, if we filter empty ones, the input might lose focus or value if we rely on `getCredential`.
+
     setApiCredentials(newCredentials);
+
+    // Auto-set default model if adding OpenRouter key and no default is set
+    if (provider === 'openrouter' && newKey && !defaultModel) {
+        setDefaultModel('openrouter/free');
+    }
 
     if (!revealedKeys[provider]) {
         setRevealedKeys(prev => ({ ...prev, [provider]: true }));
@@ -222,35 +224,33 @@ export default function AdvancedSettings() {
                     </div>
                 </div>
 
-                <div className="border-t border-border/50"></div>
-
-                {/* Default Model */}
-                <div className="space-y-4">
-                    <div className="flex items-start gap-4">
-                        <div className="p-2 rounded-lg bg-primary/10 text-primary mt-1">
-                            <Bot className="h-5 w-5" />
-                        </div>
-                        <div className="flex-1 space-y-1">
-                            <h3 className="font-medium text-foreground">Default Model</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Select the default AI model used for summaries and chat.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-background/50">
-                        <div className="flex flex-col">
-                            <span className="text-sm font-medium text-foreground truncate max-w-[200px] sm:max-w-xs">
-                                {defaultModel || "Not configured"}
-                            </span>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => setIsModelPickerOpen(true)}>
-                            Change
-                        </Button>
-                    </div>
-                </div>
             </div>
 
+            {/* Default Model Section */}
+            <div className="p-4 rounded-lg border border-border bg-card/50 backdrop-blur-sm space-y-4">
+                <div className="flex items-start gap-4">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary mt-1">
+                        <Bot className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                        <h3 className="font-medium text-foreground">Default Model</h3>
+                        <p className="text-sm text-muted-foreground">
+                            Select the default AI model used for summaries and chat.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-background/50">
+                    <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground truncate max-w-[200px] sm:max-w-xs">
+                            {defaultModel || "Not configured"}
+                        </span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => setIsModelPickerOpen(true)}>
+                        Change
+                    </Button>
+                </div>
+            </div>
 
             {/* API Credentials Section */}
             <div ref={apiSectionRef} className="rounded-lg border border-border bg-card/50 backdrop-blur-sm overflow-hidden transition-all duration-200">

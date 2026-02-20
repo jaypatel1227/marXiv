@@ -228,7 +228,7 @@ export async function exportStorageData(): Promise<string> {
 
   const theme = await getSetting('theme') || 'research';
   const font = await getSetting('font') || 'research';
-  const defaultModel = await getSetting('defaultModel') || 'google/gemini-2.0-flash-001'; // Reasonable default
+  const defaultModel = await getSetting('defaultModel') || '';
   const apiCredentials = await getSetting('apiCredentials') || [];
 
   const settingKeys = await db.getAllKeys('settings');

@@ -140,16 +140,13 @@ export default function ModelPicker({ isOpen, onClose, onSelect, currentModelId,
                         <div className="px-3 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">
                             Add Provider
                         </div>
-                        {unconfiguredProviders.map(p => (
-                            <a
-                                key={p.id}
-                                href={`/settings?focus=api`}
-                                className="w-full text-left px-3 py-2 rounded-lg text-sm text-zinc-400 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2 group"
-                            >
-                                <Plus className="h-3 w-3 group-hover:text-primary transition-colors" />
-                                {p.name}
-                            </a>
-                        ))}
+                        <a
+                            href={`/settings?focus=api`}
+                            className="w-full text-left px-3 py-2 rounded-lg text-sm text-zinc-400 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2 group"
+                        >
+                            <Plus className="h-3 w-3 group-hover:text-primary transition-colors" />
+                            Add Provider
+                        </a>
                      </div>
                 )}
             </div>
