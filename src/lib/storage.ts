@@ -3,10 +3,18 @@ import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 export type Theme = 'research' | 'swiss' | 'amber-crt' | 'midnight-soup' | 'brutalist';
 export type Font = 'research' | 'editorial' | 'raw' | 'modern-art';
 
+export type ApiProvider = 'openrouter';
+
+export interface ApiCredential {
+  provider: ApiProvider;
+  key: string;
+}
+
 // 1. Define the full Settings Schema
 export interface SettingsSchema {
   theme: Theme;
   font: Font;
+  apiCredentials: ApiCredential[];
 }
 
 interface MarxivDB extends DBSchema {
@@ -56,6 +64,7 @@ export async function exportStorageData(): Promise<string> {
 
   const theme = await getSetting('theme') || 'research';
   const font = await getSetting('font') || 'research';
+  const apiCredentials = await getSetting('apiCredentials') || [];
 
   // Get any other keys that might exist in the future (though schema is strict right now, IDB is loose)
   const keys = await db.getAllKeys('settings');
@@ -65,7 +74,7 @@ export async function exportStorageData(): Promise<string> {
 
   keys.forEach((key, index) => {
     const k = key as string;
-    if (k !== 'theme' && k !== 'font') {
+    if (k !== 'theme' && k !== 'font' && k !== 'apiCredentials') {
         otherData[k] = values[index];
     }
   });
@@ -75,6 +84,7 @@ export async function exportStorageData(): Promise<string> {
           theme,
           font
       },
+      apiCredentials,
       ...otherData
   };
 
