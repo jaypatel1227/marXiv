@@ -37,15 +37,16 @@ export function NoteCard({ note, onUpdate, onDelete, dragControls }: NoteCardPro
     return (
         <Card className="bg-background/80 backdrop-blur-sm border border-border/40 hover:border-primary/50 transition-all duration-300 relative overflow-hidden group shadow-sm hover:shadow-md">
              <CardContent className="p-0">
-                {/* Drag Handle - Visible on hover */}
+                {/* Drag Handle - Always visible on touch devices/mobile, visible on hover for desktop */}
+                {/* Added touch-none to prevent scrolling while dragging */}
                 <div
-                    className="absolute left-0 top-0 bottom-0 w-6 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-muted/30"
+                    className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10 hover:bg-muted/30 touch-none"
                     onPointerDown={(e) => dragControls?.start(e)}
                 >
                     <GripVertical className="h-4 w-4 text-muted-foreground/50" />
                 </div>
 
-                <div className="pl-8 pr-4 py-4">
+                <div className="pl-10 pr-4 py-4">
                     {isEditing ? (
                         <div className="space-y-3">
                             <Textarea
@@ -68,8 +69,8 @@ export function NoteCard({ note, onUpdate, onDelete, dragControls }: NoteCardPro
                                 {note.content}
                             </div>
 
-                            {/* Metadata and Actions - Reveal on Hover */}
-                            <div className="h-0 overflow-hidden group-hover:h-auto group-hover:pt-3 transition-all duration-300 ease-in-out">
+                            {/* Metadata and Actions - Always visible on mobile, reveal on hover for desktop */}
+                            <div className="h-auto pt-3 sm:h-0 sm:overflow-hidden sm:group-hover:h-auto sm:group-hover:pt-3 transition-all duration-300 ease-in-out">
                                 <div className="flex justify-between items-center border-t border-border/30 pt-2">
                                     <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
                                         {new Date(note.createdAt).toLocaleString(undefined, {
