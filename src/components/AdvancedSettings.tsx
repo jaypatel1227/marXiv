@@ -1,10 +1,18 @@
 import React, { useRef } from 'react';
-import { Download, Upload, Database } from 'lucide-react';
+import { Download, Upload, Database, Palette, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useStorage } from '@/hooks/use-storage';
+import { useStorage, type Theme } from '@/hooks/use-storage';
+
+const themes = [
+  { id: 'research', name: 'Research Terminal', color: '#00f3ff', preview: 'bg-[#050505] border-[#00f3ff]' },
+  { id: 'swiss', name: 'Swiss Paper', color: '#cc0000', preview: 'bg-[#fbfbfb] border-[#cc0000]' },
+  { id: 'amber-crt', name: 'Amber CRT', color: '#ffb000', preview: 'bg-[#050505] border-[#ffb000]' },
+  { id: 'midnight-soup', name: 'Midnight Soup', color: '#a060ff', preview: 'bg-[#0f0518] border-[#a060ff]' },
+  { id: 'brutalist', name: 'Brutalist Blueprint', color: '#0022cc', preview: 'bg-[#0022cc] border-white' },
+];
 
 export default function AdvancedSettings() {
-  const { exportData, importData } = useStorage();
+  const { theme, setTheme, exportData, importData } = useStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDownload = async () => {
@@ -51,7 +59,49 @@ export default function AdvancedSettings() {
             <p className="text-muted-foreground">Manage your local data and application preferences.</p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-6">
+            {/* Appearance Section */}
+            <div className="p-4 rounded-lg border border-border bg-card/50 backdrop-blur-sm space-y-4">
+                 <div className="flex items-start gap-4">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary mt-1">
+                        <Palette className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                        <h3 className="font-medium text-foreground">Appearance</h3>
+                        <p className="text-sm text-muted-foreground">
+                            Choose your preferred visual theme for the application.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                    {themes.map((t) => (
+                        <button
+                            key={t.id}
+                            onClick={() => setTheme(t.id as Theme)}
+                            className={`group relative flex flex-col items-center justify-center gap-2 p-3 rounded-lg border transition-all duration-200 ${
+                                theme === t.id
+                                ? 'border-primary bg-primary/10 shadow-[0_0_15px_-3px_rgba(var(--primary),0.3)]'
+                                : 'border-border bg-background/50 hover:border-primary/50 hover:bg-background'
+                            }`}
+                        >
+                            <div className={`w-8 h-8 rounded-full shadow-inner border-2 ${t.preview.replace('border-', 'border-')}`}
+                                    style={{ backgroundColor: t.id === 'swiss' ? '#fbfbfb' : (t.id === 'brutalist' ? '#0022cc' : (t.id === 'midnight-soup' ? '#0f0518' : '#050505')), borderColor: t.color }}></div>
+                            <span className={`text-xs font-medium ${theme === t.id ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                                {t.name}
+                            </span>
+                            {theme === t.id && (
+                                <div className="absolute top-1 right-1 text-primary">
+                                    <Check className="h-3 w-3" />
+                                </div>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+
+            {/* Data Management Section */}
             <div className="p-4 rounded-lg border border-border bg-card/50 backdrop-blur-sm space-y-4">
                 <div className="flex items-start gap-4">
                     <div className="p-2 rounded-lg bg-primary/10 text-primary mt-1">
