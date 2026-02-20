@@ -39,6 +39,11 @@ export default function AdvancedSettings() {
         newCredentials.push({ provider: provider as any, key: newKey });
     }
     setApiCredentials(newCredentials);
+
+    // If the key was previously empty (or we are typing), ensure it stays revealed so we can continue typing
+    if (!revealedKeys[provider]) {
+        setRevealedKeys(prev => ({ ...prev, [provider]: true }));
+    }
   };
 
   const getCredential = (provider: string) => apiCredentials?.find(c => c.provider === provider)?.key || '';
@@ -210,18 +215,20 @@ export default function AdvancedSettings() {
                                 <input
                                     type="text"
                                     value={revealedKeys['openrouter'] ? getCredential('openrouter') : (getCredential('openrouter') ? getCredential('openrouter').slice(0, 8) + '••••••••••••••••' : '')}
-                                    onChange={(e) => revealedKeys['openrouter'] && handleKeyChange('openrouter', e.target.value)}
-                                    readOnly={!revealedKeys['openrouter']}
-                                    className={`w-full bg-background border border-border rounded-md pl-3 pr-10 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary font-mono ${!revealedKeys['openrouter'] && 'opacity-75 cursor-default'}`}
+                                    onChange={(e) => (revealedKeys['openrouter'] || !getCredential('openrouter')) && handleKeyChange('openrouter', e.target.value)}
+                                    readOnly={!revealedKeys['openrouter'] && !!getCredential('openrouter')}
+                                    className={`w-full bg-background border border-border rounded-md pl-3 pr-10 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary font-mono ${(!revealedKeys['openrouter'] && !!getCredential('openrouter')) && 'opacity-75 cursor-default'}`}
                                     placeholder={revealedKeys['openrouter'] ? "sk-or-..." : "No API Key set"}
                                 />
-                                <button
-                                    onClick={() => toggleReveal('openrouter')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                    title={revealedKeys['openrouter'] ? 'Hide and Lock' : 'Reveal and Edit'}
-                                >
-                                    {revealedKeys['openrouter'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
+                                {!!getCredential('openrouter') && (
+                                    <button
+                                        onClick={() => toggleReveal('openrouter')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                        title={revealedKeys['openrouter'] ? 'Hide and Lock' : 'Reveal and Edit'}
+                                    >
+                                        {revealedKeys['openrouter'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                )}
                             </div>
                             <p className="text-xs text-muted-foreground">
                                 Required for AI features. Stored locally on your device.
