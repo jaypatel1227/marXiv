@@ -13,10 +13,12 @@ interface StorageState {
   theme: Theme;
   font: Font;
   apiCredentials: ApiCredential[];
+  defaultModel: string;
   isLoading: boolean;
 }
 
 const STORAGE_EVENT = 'marxiv-storage-update';
+const DEFAULT_MODEL = 'google/gemini-2.0-flash-001';
 
 export function useStorage() {
   // Initialize from localStorage (Cache for FOUC prevention)
@@ -27,6 +29,7 @@ export function useStorage() {
         theme: (localStorage.getItem('theme') as Theme) || 'research',
         font: (localStorage.getItem('font') as Font) || 'research',
         apiCredentials: [],
+        defaultModel: localStorage.getItem('defaultModel') || DEFAULT_MODEL,
         isLoading: false,
       };
     }
@@ -34,6 +37,7 @@ export function useStorage() {
       theme: 'research',
       font: 'research',
       apiCredentials: [],
+      defaultModel: DEFAULT_MODEL,
       isLoading: true,
     };
   });
@@ -46,6 +50,7 @@ export function useStorage() {
         const storedTheme = await getSetting<Theme>('theme');
         const storedFont = await getSetting<Font>('font');
         const storedApiCredentials = await getSetting<ApiCredential[]>('apiCredentials');
+        const storedDefaultModel = await getSetting<string>('defaultModel');
 
         if (storedTheme) {
             setState(s => {
@@ -69,6 +74,15 @@ export function useStorage() {
         }
         if (storedApiCredentials) {
             setState(s => ({ ...s, apiCredentials: storedApiCredentials }));
+        }
+        if (storedDefaultModel) {
+            setState(s => {
+                if (s.defaultModel !== storedDefaultModel) {
+                    localStorage.setItem('defaultModel', storedDefaultModel);
+                    return { ...s, defaultModel: storedDefaultModel };
+                }
+                return s;
+            });
         }
       } catch (e) {
         console.error('Failed to load settings from DB:', e);
@@ -106,6 +120,8 @@ export function useStorage() {
         applyFontToDOM(value);
       } else if (key === 'apiCredentials') {
         setState(s => ({ ...s, apiCredentials: value }));
+      } else if (key === 'defaultModel') {
+        setState(s => ({ ...s, defaultModel: value }));
       }
     };
 
@@ -139,6 +155,18 @@ export function useStorage() {
     window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key: 'font', value: newFont } }));
   }, [applyFontToDOM]);
 
+  const setDefaultModel = useCallback((newModel: string) => {
+    setState(s => ({ ...s, defaultModel: newModel }));
+
+    // Update Cache
+    localStorage.setItem('defaultModel', newModel);
+
+    // Update Source of Truth
+    setSetting('defaultModel', newModel).catch(console.error);
+
+    window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key: 'defaultModel', value: newModel } }));
+  }, []);
+
   const setApiCredentials = useCallback((newCredentials: ApiCredential[]) => {
     setState(s => ({ ...s, apiCredentials: newCredentials }));
     // Update Source of Truth
@@ -169,16 +197,19 @@ export function useStorage() {
     const newTheme = await getSetting<Theme>('theme');
     const newFont = await getSetting<Font>('font');
     const newCredentials = await getSetting<ApiCredential[]>('apiCredentials');
+    const newDefaultModel = await getSetting<string>('defaultModel');
 
     if (newTheme) setTheme(newTheme);
     if (newFont) setFont(newFont);
     if (newCredentials) setApiCredentials(newCredentials);
-  }, [setTheme, setFont, setApiCredentials]);
+    if (newDefaultModel) setDefaultModel(newDefaultModel);
+  }, [setTheme, setFont, setApiCredentials, setDefaultModel]);
 
   return {
     ...state,
     setTheme,
     setFont,
+    setDefaultModel,
     setApiCredentials,
     updateSetting,
     getSettingValue,

@@ -3,7 +3,7 @@ import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 export type Theme = 'research' | 'swiss' | 'amber-crt' | 'midnight-soup' | 'brutalist';
 export type Font = 'research' | 'editorial' | 'raw' | 'modern-art';
 
-export type ApiProvider = 'openrouter';
+export type ApiProvider = 'openrouter' | 'openai' | 'anthropic' | 'google';
 
 export interface ApiCredential {
   provider: ApiProvider;
@@ -15,6 +15,7 @@ export interface SettingsSchema {
   theme: Theme;
   font: Font;
   apiCredentials: ApiCredential[];
+  defaultModel?: string;
 }
 
 export interface Note {
@@ -221,8 +222,13 @@ export async function reorderNotesInPaper(paperId: string, newNotes: Note[]): Pr
 export async function exportStorageData(): Promise<string> {
   const db = await initDB();
 
+  // We explicitly fetch known settings to ensure they are included even if not explicitly set (using defaults)
+  // Or we fetch all keys and restructure them.
+  // The user requested `theme`, `font` and `defaultModel` specifically be wrapped in `personalization`.
+
   const theme = await getSetting('theme') || 'research';
   const font = await getSetting('font') || 'research';
+  const defaultModel = await getSetting('defaultModel') || 'google/gemini-2.0-flash-001'; // Reasonable default
   const apiCredentials = await getSetting('apiCredentials') || [];
 
   const settingKeys = await db.getAllKeys('settings');
@@ -232,7 +238,7 @@ export async function exportStorageData(): Promise<string> {
 
   settingKeys.forEach((key, index) => {
     const k = key as string;
-    if (k !== 'theme' && k !== 'font') {
+    if (k !== 'theme' && k !== 'font' && k !== 'defaultModel' && k !== 'apiCredentials') {
         otherSettings[k] = settingValues[index];
     }
   });
@@ -243,7 +249,8 @@ export async function exportStorageData(): Promise<string> {
   const exportData = {
       personalization: {
           theme,
-          font
+          font,
+          defaultModel
       },
       ...otherSettings,
       notes: allNotes,
@@ -274,6 +281,10 @@ export async function importStorageData(jsonString: string): Promise<void> {
         if (data.personalization.font) {
             await storeSettings.put(data.personalization.font, 'font');
         }
+        if (data.personalization.defaultModel) {
+            await storeSettings.put(data.personalization.defaultModel, 'defaultModel');
+        }
+        // Remove it so we don't double import if we iterate
         delete data.personalization;
     }
 
