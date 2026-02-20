@@ -43,10 +43,10 @@ export function NoteCard({ note, onUpdate, onDelete, dragControls }: NoteCardPro
             className="bg-background/80 backdrop-blur-sm border border-border/40 hover:border-primary/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-all duration-300 relative overflow-hidden group shadow-sm hover:shadow-md"
         >
              <CardContent className="p-0">
-                {/* Drag Handle - Always visible on touch devices/mobile, visible on hover/focus for desktop */}
+                {/* Drag Handle - Always visible on all devices now (as requested) */}
                 {/* Added touch-none to prevent scrolling while dragging */}
                 <div
-                    className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus:opacity-100 sm:group-focus-within:opacity-100 transition-opacity z-10 hover:bg-muted/30 touch-none"
+                    className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-100 transition-opacity z-10 hover:bg-muted/30 touch-none"
                     onPointerDown={(e) => dragControls?.start(e)}
                 >
                     <GripVertical className="h-4 w-4 text-muted-foreground/50" />
