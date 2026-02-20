@@ -35,12 +35,18 @@ export function NoteCard({ note, onUpdate, onDelete, dragControls }: NoteCardPro
     };
 
     return (
-        <Card className="bg-background/80 backdrop-blur-sm border border-border/40 hover:border-primary/50 transition-all duration-300 relative overflow-hidden group shadow-sm hover:shadow-md">
+        <Card
+            // Added tabIndex={0} to make the card focusable
+            // Added focus:ring-1 focus:ring-primary/30 outline-none for focus styling
+            // Added group-focus-within logic to revealing sections
+            tabIndex={0}
+            className="bg-background/80 backdrop-blur-sm border border-border/40 hover:border-primary/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none transition-all duration-300 relative overflow-hidden group shadow-sm hover:shadow-md"
+        >
              <CardContent className="p-0">
-                {/* Drag Handle - Always visible on touch devices/mobile, visible on hover for desktop */}
+                {/* Drag Handle - Always visible on touch devices/mobile, visible on hover/focus for desktop */}
                 {/* Added touch-none to prevent scrolling while dragging */}
                 <div
-                    className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10 hover:bg-muted/30 touch-none"
+                    className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-grab active:cursor-grabbing opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus:opacity-100 sm:group-focus-within:opacity-100 transition-opacity z-10 hover:bg-muted/30 touch-none"
                     onPointerDown={(e) => dragControls?.start(e)}
                 >
                     <GripVertical className="h-4 w-4 text-muted-foreground/50" />
@@ -69,8 +75,8 @@ export function NoteCard({ note, onUpdate, onDelete, dragControls }: NoteCardPro
                                 {note.content}
                             </div>
 
-                            {/* Metadata and Actions - Always visible on mobile, reveal on hover for desktop */}
-                            <div className="h-auto pt-3 sm:h-0 sm:overflow-hidden sm:group-hover:h-auto sm:group-hover:pt-3 transition-all duration-300 ease-in-out">
+                            {/* Metadata and Actions - Always visible on mobile, reveal on hover/focus for desktop */}
+                            <div className="h-auto pt-3 sm:h-0 sm:overflow-hidden sm:group-hover:h-auto sm:group-focus:h-auto sm:group-focus-within:h-auto sm:group-hover:pt-3 sm:group-focus:pt-3 sm:group-focus-within:pt-3 transition-all duration-300 ease-in-out">
                                 <div className="flex justify-between items-center border-t border-border/30 pt-2">
                                     <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
                                         {new Date(note.createdAt).toLocaleString(undefined, {
