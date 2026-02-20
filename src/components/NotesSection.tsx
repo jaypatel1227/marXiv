@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNotes } from '../hooks/use-notes';
 import { NoteCard } from './NoteCard';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Plus, X } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
+import { Reorder, useDragControls } from 'framer-motion';
 
 interface NotesSectionProps {
     paperId: string;
@@ -12,10 +13,25 @@ interface NotesSectionProps {
 }
 
 export function NotesSection({ paperId, paperTitle }: NotesSectionProps) {
-    const { notes, isLoading, add, update, remove } = useNotes(paperId, paperTitle);
+    const { notes, isLoading, add, update, remove, reorder } = useNotes(paperId, paperTitle);
     const [isAdding, setIsAdding] = useState(false);
     const [newNoteContent, setNewNoteContent] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+
+    // We reverse the notes for display (newest first) by default in many apps,
+    // BUT for drag and drop reordering, we usually want to manipulate the source array directly.
+    // If we want "visual" reverse but "logical" append, it gets tricky with DnD.
+    // Let's assume the user wants full control over order, so we display `notes` as is.
+    // When adding, we push to end.
+    // Ideally, for a "Note taking" app, new notes might go to top or bottom.
+    // The previous implementation did `notes.slice().reverse().map(...)`.
+    // If we want manual reordering, we should probably just show them in the order stored in DB.
+    // And let the user drag them to wherever they want.
+    // So we will stop reversing them here and rely on the array order.
+
+    // However, `addNoteToPaper` pushes to the END of the array.
+    // If we want new notes at the top, we should unshift, or let the user drag it there.
+    // Let's stick to "Order in DB is Order on Screen".
 
     const handleAdd = async () => {
         if (!newNoteContent.trim()) return;
@@ -74,22 +90,43 @@ export function NotesSection({ paperId, paperTitle }: NotesSectionProps) {
                 </Card>
             )}
 
-            <div className="grid gap-4">
-                {notes.length === 0 && !isAdding ? (
-                    <div className="text-center py-8 border border-dashed border-border rounded-lg">
-                        <p className="text-muted-foreground text-sm font-mono">No notes yet. Add one to track your thoughts.</p>
-                    </div>
-                ) : (
-                    notes.slice().reverse().map(note => (
-                        <NoteCard
+            {notes.length === 0 && !isAdding ? (
+                <div className="text-center py-8 border border-dashed border-border rounded-lg">
+                    <p className="text-muted-foreground text-sm font-mono">No notes yet. Add one to track your thoughts.</p>
+                </div>
+            ) : (
+                <Reorder.Group axis="y" values={notes} onReorder={reorder} className="grid gap-4">
+                    {notes.map(note => (
+                        <NoteItem
                             key={note.id}
                             note={note}
                             onUpdate={update}
                             onDelete={remove}
                         />
-                    ))
-                )}
-            </div>
+                    ))}
+                </Reorder.Group>
+            )}
         </div>
+    );
+}
+
+// Wrapper component to handle DragControls for each item
+function NoteItem({ note, onUpdate, onDelete }: { note: any, onUpdate: any, onDelete: any }) {
+    const dragControls = useDragControls();
+
+    return (
+        <Reorder.Item
+            value={note}
+            dragListener={false}
+            dragControls={dragControls}
+            className="relative"
+        >
+            <NoteCard
+                note={note}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
+                dragControls={dragControls}
+            />
+        </Reorder.Item>
     );
 }

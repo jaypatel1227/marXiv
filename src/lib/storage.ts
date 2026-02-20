@@ -194,6 +194,20 @@ export async function deleteNoteFromPaper(paperId: string, noteId: string): Prom
     await tx.done;
 }
 
+export async function reorderNotesInPaper(paperId: string, newNotes: Note[]): Promise<void> {
+    const db = await initDB();
+    const tx = db.transaction('notes', 'readwrite');
+    const store = tx.objectStore('notes');
+
+    const paperNote = await store.get(paperId);
+    if (!paperNote) throw new Error('Paper not found');
+
+    paperNote.notes = newNotes;
+
+    await store.put(paperNote);
+    await tx.done;
+}
+
 
 // Export Helper
 export async function exportStorageData(): Promise<string> {

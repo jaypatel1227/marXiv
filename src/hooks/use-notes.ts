@@ -4,6 +4,7 @@ import {
     addNoteToPaper,
     updateNoteInPaper,
     deleteNoteFromPaper,
+    reorderNotesInPaper,
     type Note
 } from '../lib/storage';
 
@@ -29,7 +30,13 @@ export function useNotes(paperId: string, paperTitle: string) {
 
         const handleNotesUpdate = (event: CustomEvent) => {
             if (event.detail.paperId === paperId) {
-                loadNotes();
+                // If the event provides the new notes directly (from local reorder), use them
+                // Otherwise reload from DB
+                if (event.detail.notes) {
+                    setNotes(event.detail.notes);
+                } else {
+                    loadNotes();
+                }
             }
         };
 
@@ -67,11 +74,26 @@ export function useNotes(paperId: string, paperTitle: string) {
         }
     }, [paperId]);
 
+    const reorder = useCallback(async (newNotes: Note[]) => {
+        // Optimistic update
+        setNotes(newNotes);
+        try {
+            await reorderNotesInPaper(paperId, newNotes);
+            // Dispatch event with new notes to keep sync fast without reload
+            window.dispatchEvent(new CustomEvent(NOTES_EVENT, { detail: { paperId, notes: newNotes } }));
+        } catch (error) {
+            console.error('Failed to reorder notes:', error);
+            // Revert on failure
+            loadNotes();
+        }
+    }, [paperId, loadNotes]);
+
     return {
         notes,
         isLoading,
         add,
         update,
-        remove
+        remove,
+        reorder
     };
 }
