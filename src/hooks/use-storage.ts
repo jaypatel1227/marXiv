@@ -13,6 +13,7 @@ interface StorageState {
   theme: Theme;
   font: Font;
   apiCredentials: ApiCredential[];
+  defaultModel: string;
   isLoading: boolean;
 }
 
@@ -27,6 +28,7 @@ export function useStorage() {
         theme: (localStorage.getItem('theme') as Theme) || 'research',
         font: (localStorage.getItem('font') as Font) || 'research',
         apiCredentials: [],
+        defaultModel: '',
         isLoading: false,
       };
     }
@@ -34,6 +36,7 @@ export function useStorage() {
       theme: 'research',
       font: 'research',
       apiCredentials: [],
+      defaultModel: '',
       isLoading: true,
     };
   });
@@ -46,6 +49,7 @@ export function useStorage() {
         const storedTheme = await getSetting<Theme>('theme');
         const storedFont = await getSetting<Font>('font');
         const storedApiCredentials = await getSetting<ApiCredential[]>('apiCredentials');
+        const storedDefaultModel = await getSetting<string>('defaultModel');
 
         if (storedTheme) {
             setState(s => {
@@ -69,6 +73,9 @@ export function useStorage() {
         }
         if (storedApiCredentials) {
             setState(s => ({ ...s, apiCredentials: storedApiCredentials }));
+        }
+        if (storedDefaultModel) {
+            setState(s => ({ ...s, defaultModel: storedDefaultModel }));
         }
       } catch (e) {
         console.error('Failed to load settings from DB:', e);
@@ -106,6 +113,8 @@ export function useStorage() {
         applyFontToDOM(value);
       } else if (key === 'apiCredentials') {
         setState(s => ({ ...s, apiCredentials: value }));
+      } else if (key === 'defaultModel') {
+        setState(s => ({ ...s, defaultModel: value }));
       }
     };
 
@@ -139,12 +148,30 @@ export function useStorage() {
     window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key: 'font', value: newFont } }));
   }, [applyFontToDOM]);
 
-  const setApiCredentials = useCallback((newCredentials: ApiCredential[]) => {
-    setState(s => ({ ...s, apiCredentials: newCredentials }));
-    // Update Source of Truth
-    setSetting('apiCredentials', newCredentials).catch(console.error);
-    window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key: 'apiCredentials', value: newCredentials } }));
+  const setDefaultModel = useCallback((newModel: string) => {
+    setState(s => ({ ...s, defaultModel: newModel }));
+    setSetting('defaultModel', newModel).catch(console.error);
+    window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key: 'defaultModel', value: newModel } }));
   }, []);
+
+  const setApiCredentials = useCallback((newCredentials: ApiCredential[]) => {
+    // Filter out empty keys (Key Clearing Logic)
+    const cleanedCredentials = newCredentials.filter(c => c.key.trim() !== '');
+
+    // Smart Auto-Set Logic
+    const oldCredentials = state.apiCredentials;
+    const hasOpenRouterOld = oldCredentials.some(c => c.provider === 'openrouter' && c.key);
+    const hasOpenRouterNew = cleanedCredentials.some(c => c.provider === 'openrouter' && c.key);
+
+    if (hasOpenRouterNew && !hasOpenRouterOld && !state.defaultModel) {
+        setDefaultModel('openrouter/free');
+    }
+
+    setState(s => ({ ...s, apiCredentials: cleanedCredentials }));
+    // Update Source of Truth
+    setSetting('apiCredentials', cleanedCredentials).catch(console.error);
+    window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key: 'apiCredentials', value: cleanedCredentials } }));
+  }, [state.apiCredentials, state.defaultModel, setDefaultModel]);
 
   // Generic Helpers for future expansion (Notes, Read Next, API Keys)
   // We expose specific typed helpers if needed, or generic ones.
@@ -169,17 +196,20 @@ export function useStorage() {
     const newTheme = await getSetting<Theme>('theme');
     const newFont = await getSetting<Font>('font');
     const newCredentials = await getSetting<ApiCredential[]>('apiCredentials');
+    const newDefaultModel = await getSetting<string>('defaultModel');
 
     if (newTheme) setTheme(newTheme);
     if (newFont) setFont(newFont);
     if (newCredentials) setApiCredentials(newCredentials);
-  }, [setTheme, setFont, setApiCredentials]);
+    if (newDefaultModel) setDefaultModel(newDefaultModel);
+  }, [setTheme, setFont, setApiCredentials, setDefaultModel]);
 
   return {
     ...state,
     setTheme,
     setFont,
     setApiCredentials,
+    setDefaultModel,
     updateSetting,
     getSettingValue,
     exportData,
