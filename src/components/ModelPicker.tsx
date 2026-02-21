@@ -117,16 +117,17 @@ export default function ModelPicker({ isOpen, onClose, onSelect, currentModelId,
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150]"
           />
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className={`fixed inset-0 m-auto w-[90vw] md:w-[600px] max-w-full ${configuredProviders.length > 1 ? 'h-[500px] max-h-[85vh]' : 'h-auto max-h-[85vh]'} bg-[#09090b] border border-white/10 rounded-xl shadow-2xl z-[160] flex overflow-hidden flex-col md:flex-row`}
-          >
-            {/* Zero State / No Providers Configured */}
-            {configuredProviders.length <= 1 && apiCredentials.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-8 text-center space-y-6 w-full h-auto">
-                    <button
+          <div className="fixed inset-0 z-[160] flex items-center justify-center p-4 pointer-events-none">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className={`w-full md:w-[600px] max-w-lg pointer-events-auto bg-[#09090b] border border-white/10 rounded-xl shadow-2xl flex overflow-hidden flex-col md:flex-row ${configuredProviders.length > 1 ? 'h-[500px] max-h-[85vh]' : 'h-auto'}`}
+            >
+                {/* Zero State / No Providers Configured */}
+                {configuredProviders.length <= 1 && apiCredentials.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 text-center space-y-6 w-full h-auto">
+                        <button
                         onClick={onClose}
                         className="absolute top-4 right-4 p-2 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-colors"
                     >
@@ -274,6 +275,7 @@ export default function ModelPicker({ isOpen, onClose, onSelect, currentModelId,
                 </>
             )}
           </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
