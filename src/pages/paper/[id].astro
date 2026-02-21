@@ -5,6 +5,7 @@ import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { NotesSection } from '@/components/NotesSection';
 import { Calendar, User, FileText, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -96,6 +97,12 @@ if (!paper) {
                     </div>
                 </CardContent>
             </Card>
+
+            <NotesSection
+                client:load
+                paperId={paper.shortId}
+                paperTitle={paper.title}
+            />
         </div>
     </div>
 </Layout>
