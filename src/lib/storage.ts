@@ -3,7 +3,7 @@ import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 export type Theme = 'research' | 'swiss' | 'amber-crt' | 'midnight-soup' | 'brutalist';
 export type Font = 'research' | 'editorial' | 'raw' | 'modern-art';
 
-export type ApiProvider = 'openrouter';
+export type ApiProvider = 'openrouter' | 'openai' | 'anthropic' | 'google';
 
 export interface ApiCredential {
   provider: ApiProvider;
@@ -15,6 +15,7 @@ export interface SettingsSchema {
   theme: Theme;
   font: Font;
   apiCredentials: ApiCredential[];
+  defaultModel: string;
 }
 
 export interface Note {
