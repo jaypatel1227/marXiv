@@ -109,128 +109,152 @@ export default function ModelPicker({ isOpen, onClose, onSelect, currentModelId,
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed inset-0 m-auto w-full max-w-4xl h-[80vh] bg-[#09090b] border border-white/10 rounded-xl shadow-2xl z-[160] flex overflow-hidden flex-col md:flex-row"
+            className={`fixed inset-0 m-auto w-full max-w-xl ${configuredProviders.length > 1 ? 'h-[500px]' : 'h-auto'} bg-[#09090b] border border-white/10 rounded-xl shadow-2xl z-[160] flex overflow-hidden flex-col md:flex-row`}
           >
-            {/* Sidebar */}
-            <div className="w-full md:w-64 bg-[#111114] border-b md:border-b-0 md:border-r border-white/10 flex flex-col shrink-0">
-                <div className="p-4 border-b border-white/10">
-                    <h2 className="text-lg font-semibold text-white">Models</h2>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-2 space-y-1">
-                    {configuredProviders.map(p => (
-                        <button
-                            key={p.id}
-                            onClick={() => setSelectedProvider(p.id as any)}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${
-                                selectedProvider === p.id
-                                ? 'bg-primary/20 text-primary font-medium'
-                                : 'text-zinc-400 hover:bg-white/5 hover:text-white'
-                            }`}
-                        >
-                            {p.name}
-                            {selectedProvider === p.id && <Check className="h-3 w-3" />}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Add Provider Section */}
-                {unconfiguredProviders.length > 0 && (
-                     <div className="p-2 border-t border-white/10 mt-auto">
-                        <div className="px-3 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">
-                            Add Provider
-                        </div>
-                        <a
-                            href={`/settings?focus=api`}
-                            className="w-full text-left px-3 py-2 rounded-lg text-sm text-zinc-400 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2 group"
-                        >
-                            <Plus className="h-3 w-3 group-hover:text-primary transition-colors" />
-                            Add Provider
-                        </a>
-                     </div>
-                )}
-            </div>
-
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0 bg-[#09090b]">
-                {/* Header / Search */}
-                <div className="p-4 border-b border-white/10 flex items-center gap-3">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-                        <input
-                            type="text"
-                            placeholder={`Search ${models.length} models...`}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-[#18181b] border border-white/10 rounded-lg pl-9 pr-4 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary/50"
-                            autoFocus
-                        />
-                    </div>
+            {/* Zero State / No Providers Configured */}
+            {configuredProviders.length <= 1 && apiCredentials.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-8 text-center space-y-6 w-full h-full min-h-[300px]">
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-colors"
+                        className="absolute top-4 right-4 p-2 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-colors"
                     >
                         <X className="h-5 w-5" />
                     </button>
-                </div>
 
-                {/* Model List */}
-                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                    {isLoading ? (
-                        <div className="flex flex-col items-center justify-center h-64 text-zinc-500 gap-3">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                            <p>Loading models...</p>
+                    <div className="p-4 rounded-full bg-primary/10 text-primary">
+                        <Plus className="h-8 w-8" />
+                    </div>
+
+                    <div className="space-y-2">
+                        <h2 className="text-xl font-bold text-white">No Model Providers Configured</h2>
+                        <p className="text-sm text-zinc-400 max-w-xs mx-auto">
+                            Add an API key from a supported provider to start using AI features.
+                        </p>
+                    </div>
+
+                    <a
+                        href="/settings?focus=api"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-black font-medium rounded-lg hover:bg-primary/90 transition-colors"
+                    >
+                        Configure Providers
+                    </a>
+                </div>
+            ) : (
+                <>
+                    {/* Sidebar */}
+                    <div className="w-full md:w-48 bg-[#111114] border-b md:border-b-0 md:border-r border-white/10 flex flex-col shrink-0">
+                        <div className="p-4 border-b border-white/10 hidden md:block">
+                            <h2 className="text-sm font-semibold text-white uppercase tracking-wider">Models</h2>
                         </div>
-                    ) : error ? (
-                        <div className="flex flex-col items-center justify-center h-64 text-red-400 gap-3">
-                            <AlertCircle className="h-8 w-8" />
-                            <p>{error}</p>
-                        </div>
-                    ) : filteredModels.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-64 text-zinc-500">
-                            <p>No models found.</p>
-                            {searchQuery && <p className="text-sm mt-1">Try a different search term.</p>}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-2">
-                            {filteredModels.map((model) => (
+
+                        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                            {configuredProviders.map(p => (
                                 <button
-                                    key={`${model.provider}-${model.id}`}
-                                    onClick={() => {
-                                        onSelect(model);
-                                        onClose();
-                                    }}
-                                    className={`flex items-center justify-between p-3 rounded-lg border text-left group transition-all ${
-                                        currentModelId === model.id
-                                        ? 'bg-primary/10 border-primary/50'
-                                        : 'bg-[#18181b] border-white/5 hover:border-white/20 hover:bg-[#202024]'
+                                    key={p.id}
+                                    onClick={() => setSelectedProvider(p.id as any)}
+                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-colors flex items-center justify-between ${
+                                        selectedProvider === p.id
+                                        ? 'bg-primary/20 text-primary font-medium'
+                                        : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                                     }`}
                                 >
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex items-center gap-2 mb-0.5">
-                                            <span className="font-medium text-white truncate">{model.name}</span>
-                                            <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-white/5 text-zinc-500 border border-white/5">
-                                                {model.provider}
-                                            </span>
-                                        </div>
-                                        <div className="text-xs text-zinc-500 flex items-center gap-3">
-                                            <span className="font-mono text-zinc-600">{model.id}</span>
-                                            {model.contextWindow && (
-                                                <span>{Math.round(model.contextWindow / 1000)}k ctx</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {currentModelId === model.id && (
-                                        <div className="text-primary">
-                                            <Check className="h-5 w-5" />
-                                        </div>
-                                    )}
+                                    {p.name}
+                                    {selectedProvider === p.id && <Check className="h-3 w-3" />}
                                 </button>
                             ))}
+
+                            {/* Add Provider Button - Now inline */}
+                            <a
+                                href={`/settings?focus=api`}
+                                className="w-full text-left px-3 py-2 rounded-lg text-xs text-zinc-500 hover:bg-white/5 hover:text-zinc-300 transition-colors flex items-center gap-2 mt-2 border-t border-white/5 pt-2"
+                            >
+                                <Plus className="h-3 w-3" />
+                                Add Provider
+                            </a>
                         </div>
-                    )}
-                </div>
-            </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1 flex flex-col min-w-0 bg-[#09090b]">
+                        {/* Header / Search */}
+                        <div className="p-3 border-b border-white/10 flex items-center gap-3">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-500" />
+                                <input
+                                    type="text"
+                                    placeholder={`Search...`}
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-[#18181b] border border-white/10 rounded-lg pl-8 pr-4 py-1.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary/50"
+                                    autoFocus
+                                />
+                            </div>
+                            <button
+                                onClick={onClose}
+                                className="p-1.5 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-colors"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+
+                        {/* Model List */}
+                        <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
+                            {isLoading ? (
+                                <div className="flex flex-col items-center justify-center h-48 text-zinc-500 gap-3">
+                                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                    <p className="text-xs">Loading...</p>
+                                </div>
+                            ) : error ? (
+                                <div className="flex flex-col items-center justify-center h-48 text-red-400 gap-3 text-center p-4">
+                                    <AlertCircle className="h-6 w-6" />
+                                    <p className="text-xs">{error}</p>
+                                </div>
+                            ) : filteredModels.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-48 text-zinc-500 text-center">
+                                    <p className="text-sm">No models found.</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-2">
+                                    {filteredModels.map((model) => (
+                                        <button
+                                            key={`${model.provider}-${model.id}`}
+                                            onClick={() => {
+                                                onSelect(model);
+                                                onClose();
+                                            }}
+                                            className={`flex items-center justify-between p-2.5 rounded-lg border text-left group transition-all ${
+                                                currentModelId === model.id
+                                                ? 'bg-primary/10 border-primary/50'
+                                                : 'bg-[#18181b] border-white/5 hover:border-white/20 hover:bg-[#202024]'
+                                            }`}
+                                        >
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-center gap-2 mb-0.5">
+                                                    <span className="font-medium text-white truncate text-sm">{model.name}</span>
+                                                </div>
+                                                <div className="text-[10px] text-zinc-500 flex items-center gap-2">
+                                                    <span className="uppercase tracking-wider px-1 py-0.5 rounded bg-white/5 border border-white/5">
+                                                        {model.provider}
+                                                    </span>
+                                                    <span className="font-mono text-zinc-600 truncate max-w-[150px]">{model.id}</span>
+                                                    {model.contextWindow && (
+                                                        <span>{Math.round(model.contextWindow / 1000)}k</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {currentModelId === model.id && (
+                                                <div className="text-primary">
+                                                    <Check className="h-4 w-4" />
+                                                </div>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
           </motion.div>
         </>
       )}
