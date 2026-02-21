@@ -163,7 +163,7 @@ export default function ModelPicker({ isOpen, onClose, onSelect, currentModelId,
                             <h2 className="text-sm font-semibold text-white uppercase tracking-wider">Models</h2>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                        <div className="flex-1 overflow-y-auto p-2 space-y-1 overscroll-contain min-h-0">
                             {configuredProviders.map(p => (
                                 <button
                                     key={p.id}
@@ -217,7 +217,7 @@ export default function ModelPicker({ isOpen, onClose, onSelect, currentModelId,
                         </div>
 
                         {/* Model List */}
-                        <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-3 custom-scrollbar overscroll-contain min-h-0">
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center h-48 text-zinc-500 gap-3">
                                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
