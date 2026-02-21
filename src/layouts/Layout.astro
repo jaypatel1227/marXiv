@@ -3,6 +3,7 @@ import '../styles/global.css';
 import 'katex/dist/katex.min.css';
 import SearchBar from '../components/SearchBar';
 import ThemeSettings from '../components/ThemeSettings';
+import MobileMenu from '../components/MobileMenu';
 import { Button } from '@/components/ui/button';
 import { Github, Home } from 'lucide-react';
 
@@ -89,6 +90,7 @@ const maskImage = isHome
                             <span class="sr-only">GitHub</span>
                         </a>
                     </Button>
+                    <MobileMenu client:load />
                 </div>
             </div>
         </header>

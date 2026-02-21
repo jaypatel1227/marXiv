@@ -3,10 +3,18 @@ import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 export type Theme = 'research' | 'swiss' | 'amber-crt' | 'midnight-soup' | 'brutalist';
 export type Font = 'research' | 'editorial' | 'raw' | 'modern-art';
 
+export type ApiProvider = 'openrouter';
+
+export interface ApiCredential {
+  provider: ApiProvider;
+  key: string;
+}
+
 // 1. Define the full Settings Schema
 export interface SettingsSchema {
   theme: Theme;
   font: Font;
+  apiCredentials: ApiCredential[];
 }
 
 export interface Note {
@@ -215,6 +223,7 @@ export async function exportStorageData(): Promise<string> {
 
   const theme = await getSetting('theme') || 'research';
   const font = await getSetting('font') || 'research';
+  const apiCredentials = await getSetting('apiCredentials') || [];
 
   const settingKeys = await db.getAllKeys('settings');
   const settingValues = await db.getAll('settings');

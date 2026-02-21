@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   getSetting, setSetting,
   exportStorageData, importStorageData,
-  type SettingsSchema
+  type SettingsSchema,
+  type ApiCredential
 } from '../lib/storage';
 
 export type Theme = 'research' | 'swiss' | 'amber-crt' | 'midnight-soup' | 'brutalist';
@@ -11,6 +12,7 @@ export type Font = 'research' | 'editorial' | 'raw' | 'modern-art';
 interface StorageState {
   theme: Theme;
   font: Font;
+  apiCredentials: ApiCredential[];
   isLoading: boolean;
 }
 
@@ -24,12 +26,14 @@ export function useStorage() {
       return {
         theme: (localStorage.getItem('theme') as Theme) || 'research',
         font: (localStorage.getItem('font') as Font) || 'research',
+        apiCredentials: [],
         isLoading: false,
       };
     }
     return {
       theme: 'research',
       font: 'research',
+      apiCredentials: [],
       isLoading: true,
     };
   });
@@ -41,6 +45,7 @@ export function useStorage() {
       try {
         const storedTheme = await getSetting<Theme>('theme');
         const storedFont = await getSetting<Font>('font');
+        const storedApiCredentials = await getSetting<ApiCredential[]>('apiCredentials');
 
         if (storedTheme) {
             setState(s => {
@@ -61,6 +66,9 @@ export function useStorage() {
                 }
                 return s;
             });
+        }
+        if (storedApiCredentials) {
+            setState(s => ({ ...s, apiCredentials: storedApiCredentials }));
         }
       } catch (e) {
         console.error('Failed to load settings from DB:', e);
@@ -96,6 +104,8 @@ export function useStorage() {
       } else if (key === 'font') {
         setState(s => ({ ...s, font: value }));
         applyFontToDOM(value);
+      } else if (key === 'apiCredentials') {
+        setState(s => ({ ...s, apiCredentials: value }));
       }
     };
 
@@ -129,6 +139,13 @@ export function useStorage() {
     window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key: 'font', value: newFont } }));
   }, [applyFontToDOM]);
 
+  const setApiCredentials = useCallback((newCredentials: ApiCredential[]) => {
+    setState(s => ({ ...s, apiCredentials: newCredentials }));
+    // Update Source of Truth
+    setSetting('apiCredentials', newCredentials).catch(console.error);
+    window.dispatchEvent(new CustomEvent(STORAGE_EVENT, { detail: { key: 'apiCredentials', value: newCredentials } }));
+  }, []);
+
   // Generic Helpers for future expansion (Notes, Read Next, API Keys)
   // We expose specific typed helpers if needed, or generic ones.
   // Given "Do not make the schema for all of the new objects", let's keep it simple.
@@ -151,14 +168,18 @@ export function useStorage() {
     // Reload state after import
     const newTheme = await getSetting<Theme>('theme');
     const newFont = await getSetting<Font>('font');
+    const newCredentials = await getSetting<ApiCredential[]>('apiCredentials');
+
     if (newTheme) setTheme(newTheme);
     if (newFont) setFont(newFont);
-  }, [setTheme, setFont]);
+    if (newCredentials) setApiCredentials(newCredentials);
+  }, [setTheme, setFont, setApiCredentials]);
 
   return {
     ...state,
     setTheme,
     setFont,
+    setApiCredentials,
     updateSetting,
     getSettingValue,
     exportData,

@@ -65,6 +65,7 @@ This is a modern arXiv browser built with **Astro**, **React**, and **Tailwind C
   - It should include all available settings, including those in the quick popup.
   - It is the exclusive location for data management tasks (Export/Import of IndexedDB data).
   - Any future complex configurations (e.g., API keys, advanced filtering defaults) should be added here.
+  - **Important:** When modifying the storage schema (e.g., adding new settings), ensure that the export/import workflow in `src/lib/storage.ts` is updated to include these new fields.
 
 ### 6. Fetching Data
 - Use `src/lib/arxiv.ts` for all arXiv API interactions.
