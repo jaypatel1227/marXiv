@@ -132,12 +132,15 @@ export default function ModelPicker({ isOpen, onClose, onSelect, currentModelId,
                         </p>
                     </div>
 
-                    <a
-                        href="/settings?focus=api"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-black font-medium rounded-lg hover:bg-primary/90 transition-colors"
+                    <button
+                        onClick={() => {
+                            onClose();
+                            window.location.href = '/settings?focus=api';
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 transition-colors border border-primary/20"
                     >
                         Configure Providers
-                    </a>
+                    </button>
                 </div>
             ) : (
                 <>
@@ -164,13 +167,16 @@ export default function ModelPicker({ isOpen, onClose, onSelect, currentModelId,
                             ))}
 
                             {/* Add Provider Button - Now inline */}
-                            <a
-                                href={`/settings?focus=api`}
+                            <button
+                                onClick={() => {
+                                    onClose();
+                                    window.location.href = '/settings?focus=api';
+                                }}
                                 className="w-full text-left px-3 py-2 rounded-lg text-xs text-zinc-500 hover:bg-white/5 hover:text-zinc-300 transition-colors flex items-center gap-2 mt-2 border-t border-white/5 pt-2"
                             >
                                 <Plus className="h-3 w-3" />
                                 Add Provider
-                            </a>
+                            </button>
                         </div>
                     </div>
 
