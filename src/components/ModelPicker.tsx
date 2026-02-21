@@ -93,6 +93,18 @@ export default function ModelPicker({ isOpen, onClose, onSelect, currentModelId,
     }
   }, [isOpen]);
 
+  // Lock body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -109,7 +121,7 @@ export default function ModelPicker({ isOpen, onClose, onSelect, currentModelId,
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className={`fixed inset-0 m-auto w-[90vw] md:w-[600px] max-w-full ${configuredProviders.length > 1 ? 'h-[500px]' : 'h-auto'} bg-[#09090b] border border-white/10 rounded-xl shadow-2xl z-[160] flex overflow-hidden flex-col md:flex-row`}
+            className={`fixed inset-0 m-auto w-[90vw] md:w-[600px] max-w-full ${configuredProviders.length > 1 ? 'h-[500px] max-h-[85vh]' : 'h-auto max-h-[85vh]'} bg-[#09090b] border border-white/10 rounded-xl shadow-2xl z-[160] flex overflow-hidden flex-col md:flex-row`}
           >
             {/* Zero State / No Providers Configured */}
             {configuredProviders.length <= 1 && apiCredentials.length === 0 ? (
