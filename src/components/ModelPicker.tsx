@@ -113,7 +113,7 @@ export default function ModelPicker({ isOpen, onClose, onSelect, currentModelId,
           >
             {/* Zero State / No Providers Configured */}
             {configuredProviders.length <= 1 && apiCredentials.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-8 text-center space-y-6 w-full h-full min-h-[300px]">
+                <div className="flex flex-col items-center justify-center p-8 text-center space-y-6 w-full h-auto">
                     <button
                         onClick={onClose}
                         className="absolute top-4 right-4 p-2 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-colors"
