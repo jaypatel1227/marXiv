@@ -81,6 +81,20 @@ This is a modern arXiv browser built with **Astro**, **React**, and **Tailwind C
   - The `useStorage` hook (`src/hooks/use-storage.ts`) manages synchronization: it initializes state from `localStorage` (fast path) and then reconciles with IndexedDB (authoritative path).
 - **Access Pattern:** Use the `useStorage` hook for React components. Avoid direct DB calls in UI components.
 
+## Agent skills
+
+### Issue tracker
+
+GitHub issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+single-context layout. See `docs/agents/domain.md`.
+
 ## 🛠️ Development
 
 To start the development server:
