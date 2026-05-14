@@ -3,11 +3,9 @@ import Layout from '../../layouts/Layout.astro';
 import { getPaperById } from '../../lib/arxiv';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Badge } from '@/components/ui/badge';
-import { buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { NotesSection } from '@/components/NotesSection';
 import { Calendar, User, FileText, ArrowLeft } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 const { id } = Astro.params;
 
@@ -25,9 +23,11 @@ if (!paper) {
 <Layout title={`${paper.title} - Modern arXiv`}>
     <div class="container mx-auto px-4 py-12 max-w-5xl">
         <div class="mb-8">
-            <a href="javascript:history.back()" class={cn(buttonVariants({ variant: 'ghost', size: 'sm', className: 'pl-0 hover:pl-0 text-muted-foreground hover:text-primary transition-colors flex items-center font-mono text-xs tracking-widest uppercase' }))}>
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-            </a>
+            <Button variant="ghost" size="sm" asChild className="pl-0 hover:pl-0 text-muted-foreground hover:text-primary transition-colors">
+                <a href="javascript:history.back()" class="flex items-center font-mono text-xs tracking-widest uppercase">
+                    <ArrowLeft class="mr-2 h-4 w-4" /> Back
+                </a>
+            </Button>
         </div>
 
         <div class="space-y-8 border-l-2 border-primary/20 pl-4 md:pl-8 py-2 relative">
@@ -74,13 +74,17 @@ if (!paper) {
 
             <div class="flex flex-col sm:flex-row gap-4 pt-4">
                 {paper.pdfLink && (
-                    <a href={paper.pdfLink} target="_blank" rel="noopener noreferrer" class={cn(buttonVariants({ size: 'lg', className: 'w-full sm:w-auto font-bold tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)] transition-all' }))} aria-label="Download PDF (opens in new tab)">
-                        <FileText className="mr-2 h-5 w-5" /> Download PDF
-                    </a>
+                    <Button asChild size="lg" className="w-full sm:w-auto font-bold tracking-widest bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)] transition-all">
+                        <a href={paper.pdfLink} target="_blank" rel="noopener noreferrer">
+                            <FileText className="mr-2 h-5 w-5" /> Download PDF
+                        </a>
+                    </Button>
                 )}
-                <a href={`https://arxiv.org/abs/${paper.shortId}`} target="_blank" rel="noopener noreferrer" class={cn(buttonVariants({ variant: 'outline', size: 'lg', className: 'w-full sm:w-auto font-mono text-xs border-primary/30 text-primary hover:bg-primary/10' }))} aria-label="View on arXiv.org (opens in new tab)">
-                    View on arXiv.org
-                </a>
+                <Button asChild variant="outline" size="lg" className="w-full sm:w-auto font-mono text-xs border-primary/30 text-primary hover:bg-primary/10">
+                    <a href={`https://arxiv.org/abs/${paper.shortId}`} target="_blank" rel="noopener noreferrer">
+                        View on arXiv.org
+                    </a>
+                </Button>
             </div>
 
             <Card className="bg-background/50 border-dashed border-muted-foreground/30 relative overflow-hidden group">
@@ -97,12 +101,6 @@ if (!paper) {
                     </div>
                 </CardContent>
             </Card>
-
-            <NotesSection
-                client:load
-                paperId={paper.shortId}
-                paperTitle={paper.title}
-            />
         </div>
     </div>
 </Layout>

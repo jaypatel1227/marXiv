@@ -1,7 +1,9 @@
-import React, { useRef, useState } from 'react';
-import { Download, Upload, Database, Palette, Check, Type, ArrowLeft, Key, ChevronDown, ChevronUp, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Download, Upload, Database, Palette, Check, Type, ArrowLeft, Key, ChevronDown, ChevronUp, Eye, EyeOff, ExternalLink, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStorage, type Theme, type Font } from '@/hooks/use-storage';
+import ModelPicker from './ModelPicker';
+import type { Model } from '@/lib/llm';
 
 const themes = [
   { id: 'research', name: 'Research Terminal', color: '#00f3ff', preview: 'bg-[#050505] border-[#00f3ff]' },
@@ -18,12 +20,34 @@ const fonts = [
   { id: 'modern-art', name: 'Modern Art', desc: 'Syne / Outfit' },
 ];
 
+const apiProviders = [
+    { id: 'openrouter', label: 'OpenRouter', link: 'https://openrouter.ai/keys', placeholder: 'sk-or-...' },
+    { id: 'openai', label: 'OpenAI', link: 'https://platform.openai.com/api-keys', placeholder: 'sk-...' },
+    { id: 'anthropic', label: 'Anthropic', link: 'https://console.anthropic.com/settings/keys', placeholder: 'sk-ant-...' },
+    { id: 'google', label: 'Google AI', link: 'https://aistudio.google.com/app/apikey', placeholder: 'AIza...' },
+];
+
 export default function AdvancedSettings() {
-  const { theme, setTheme, font, setFont, exportData, importData, apiCredentials, setApiCredentials } = useStorage();
+  const { theme, setTheme, font, setFont, exportData, importData, apiCredentials, setApiCredentials, defaultModel, setDefaultModel } = useStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const apiSectionRef = useRef<HTMLDivElement>(null);
 
   const [isApiSectionOpen, setIsApiSectionOpen] = useState(false);
   const [revealedKeys, setRevealedKeys] = useState<Record<string, boolean>>({});
+  const [isModelPickerOpen, setIsModelPickerOpen] = useState(false);
+
+  useEffect(() => {
+    // Check for focus param
+    if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('focus') === 'api') {
+            setIsApiSectionOpen(true);
+            setTimeout(() => {
+                apiSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+    }
+  }, []);
 
   const toggleReveal = (provider: string) => {
     setRevealedKeys(prev => ({ ...prev, [provider]: !prev[provider] }));
@@ -34,13 +58,22 @@ export default function AdvancedSettings() {
     const index = newCredentials.findIndex(c => c.provider === provider);
 
     if (index >= 0) {
-        newCredentials[index] = { ...newCredentials[index], key: newKey };
-    } else {
+        if (!newKey) {
+             newCredentials.splice(index, 1);
+        } else {
+             newCredentials[index] = { ...newCredentials[index], key: newKey };
+        }
+    } else if (newKey) {
         newCredentials.push({ provider: provider as any, key: newKey });
     }
+
     setApiCredentials(newCredentials);
 
-    // If the key was previously empty (or we are typing), ensure it stays revealed so we can continue typing
+    // Auto-set default model if adding OpenRouter key and no default is set
+    if (provider === 'openrouter' && newKey && !defaultModel) {
+        setDefaultModel('openrouter/free');
+    }
+
     if (!revealedKeys[provider]) {
         setRevealedKeys(prev => ({ ...prev, [provider]: true }));
     }
@@ -85,6 +118,14 @@ export default function AdvancedSettings() {
     }
   };
 
+  const handleModelSelect = (model: Model) => {
+      // We store the model ID.
+      // If the provider is not OpenRouter (and model ID doesn't already have provider prefix implicitly),
+      // we might want to store it in a way that we know the provider.
+      // But for now, we just store the ID as per plan.
+      setDefaultModel(model.id);
+  };
+
   return (
     <div className="space-y-6 max-w-2xl mx-auto p-4 sm:p-6 md:p-8">
         <div>
@@ -113,7 +154,7 @@ export default function AdvancedSettings() {
                         <div className="flex-1 space-y-1">
                             <h3 className="font-medium text-foreground">Theme</h3>
                             <p className="text-sm text-muted-foreground">
-                                Choose your preferred visual theme for the application.
+                                Choose your preferred visual theme.
                             </p>
                         </div>
                     </div>
@@ -155,7 +196,7 @@ export default function AdvancedSettings() {
                         <div className="flex-1 space-y-1">
                             <h3 className="font-medium text-foreground">Typography</h3>
                             <p className="text-sm text-muted-foreground">
-                                Select the font pairing that suits your reading style.
+                                Select the font pairing.
                             </p>
                         </div>
                     </div>
@@ -182,11 +223,37 @@ export default function AdvancedSettings() {
                         ))}
                     </div>
                 </div>
+
             </div>
 
+            {/* Default Model Section */}
+            <div className="p-4 rounded-lg border border-border bg-card/50 backdrop-blur-sm space-y-4">
+                <div className="flex items-start gap-4">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary mt-1">
+                        <Bot className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                        <h3 className="font-medium text-foreground">Default Model</h3>
+                        <p className="text-sm text-muted-foreground">
+                            Select the default AI model used for summaries and chat.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-background/50">
+                    <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground truncate max-w-[200px] sm:max-w-xs">
+                            {defaultModel || "Not configured"}
+                        </span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => setIsModelPickerOpen(true)}>
+                        Change
+                    </Button>
+                </div>
+            </div>
 
             {/* API Credentials Section */}
-            <div className="rounded-lg border border-border bg-card/50 backdrop-blur-sm overflow-hidden transition-all duration-200">
+            <div ref={apiSectionRef} className="rounded-lg border border-border bg-card/50 backdrop-blur-sm overflow-hidden transition-all duration-200">
                 <button
                     onClick={() => setIsApiSectionOpen(!isApiSectionOpen)}
                     className="w-full flex items-center gap-4 p-4 text-left hover:bg-primary/5 transition-colors"
@@ -202,38 +269,40 @@ export default function AdvancedSettings() {
                 </button>
 
                 {isApiSectionOpen && (
-                    <div className="p-4 pt-0 space-y-4 border-t border-border/50 mt-2">
-                        {/* OpenRouter */}
-                        <div className="space-y-2 pt-4">
-                            <div className="flex items-center justify-between">
-                                <label className="text-sm font-medium text-foreground">OpenRouter API Key</label>
-                                <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
-                                    Get Key <ExternalLink className="h-3 w-3" />
-                                </a>
+                    <div className="p-4 pt-0 space-y-6 border-t border-border/50 mt-2">
+                        {apiProviders.map((provider) => (
+                            <div key={provider.id} className="space-y-2 pt-2 first:pt-4">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium text-foreground">{provider.label} API Key</label>
+                                    <a href={provider.link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                                        Get Key <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                </div>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={revealedKeys[provider.id] ? getCredential(provider.id) : (getCredential(provider.id) ? getCredential(provider.id).slice(0, 8) + '••••••••••••••••' : '')}
+                                        onChange={(e) => (revealedKeys[provider.id] || !getCredential(provider.id)) && handleKeyChange(provider.id, e.target.value)}
+                                        readOnly={!revealedKeys[provider.id] && !!getCredential(provider.id)}
+                                        className={`w-full bg-background border border-border rounded-md pl-3 pr-10 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary font-mono ${(!revealedKeys[provider.id] && !!getCredential(provider.id)) && 'opacity-75 cursor-default'}`}
+                                        placeholder={revealedKeys[provider.id] ? provider.placeholder : "No API Key set"}
+                                    />
+                                    {!!getCredential(provider.id) && (
+                                        <button
+                                            onClick={() => toggleReveal(provider.id)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                            title={revealedKeys[provider.id] ? 'Hide and Lock' : 'Reveal and Edit'}
+                                        >
+                                            {revealedKeys[provider.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={revealedKeys['openrouter'] ? getCredential('openrouter') : (getCredential('openrouter') ? getCredential('openrouter').slice(0, 8) + '••••••••••••••••' : '')}
-                                    onChange={(e) => (revealedKeys['openrouter'] || !getCredential('openrouter')) && handleKeyChange('openrouter', e.target.value)}
-                                    readOnly={!revealedKeys['openrouter'] && !!getCredential('openrouter')}
-                                    className={`w-full bg-background border border-border rounded-md pl-3 pr-10 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary font-mono ${(!revealedKeys['openrouter'] && !!getCredential('openrouter')) && 'opacity-75 cursor-default'}`}
-                                    placeholder={revealedKeys['openrouter'] ? "sk-or-..." : "No API Key set"}
-                                />
-                                {!!getCredential('openrouter') && (
-                                    <button
-                                        onClick={() => toggleReveal('openrouter')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                        title={revealedKeys['openrouter'] ? 'Hide and Lock' : 'Reveal and Edit'}
-                                    >
-                                        {revealedKeys['openrouter'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                    </button>
-                                )}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                Required for AI features. Stored locally on your device.
-                            </p>
-                        </div>
+                        ))}
+
+                        <p className="text-xs text-muted-foreground pt-2 border-t border-border/50">
+                            Required for AI features. Keys are stored locally on your device and never sent to our servers.
+                        </p>
                     </div>
                 )}
             </div>
@@ -273,6 +342,14 @@ export default function AdvancedSettings() {
                 </div>
             </div>
         </div>
+
+        <ModelPicker
+            isOpen={isModelPickerOpen}
+            onClose={() => setIsModelPickerOpen(false)}
+            onSelect={handleModelSelect}
+            currentModelId={defaultModel}
+            apiCredentials={apiCredentials}
+        />
     </div>
   );
 }
