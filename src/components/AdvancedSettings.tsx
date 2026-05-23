@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { Download, Upload, Database, Palette, Check, Type, ArrowLeft, Key, ChevronDown, ChevronUp, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Download, Upload, Database, Palette, Check, Type, ArrowLeft, Key, ChevronDown, ChevronUp, Eye, EyeOff, ExternalLink, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStorage, type Theme, type Font } from '@/hooks/use-storage';
+import { MODELS, PROVIDERS } from '@/lib/llm';
 
 const themes = [
   { id: 'research', name: 'Research Terminal', color: '#00f3ff', preview: 'bg-[#050505] border-[#00f3ff]' },
@@ -18,12 +19,24 @@ const fonts = [
   { id: 'modern-art', name: 'Modern Art', desc: 'Syne / Outfit' },
 ];
 
+const PROVIDER_URLS: Record<string, string> = {
+    openrouter: 'https://openrouter.ai/keys',
+    openai: 'https://platform.openai.com/api-keys',
+    anthropic: 'https://console.anthropic.com/settings/keys',
+    google: 'https://aistudio.google.com/app/apikey',
+};
+
 export default function AdvancedSettings() {
-  const { theme, setTheme, font, setFont, exportData, importData, apiCredentials, setApiCredentials } = useStorage();
+  const { theme, setTheme, font, setFont, exportData, importData, apiCredentials, setApiCredentials, defaultModel, setDefaultModel } = useStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isApiSectionOpen, setIsApiSectionOpen] = useState(false);
   const [revealedKeys, setRevealedKeys] = useState<Record<string, boolean>>({});
+
+  // Filter available models based on configured keys
+  const availableModels = MODELS.filter(m =>
+    apiCredentials.some(c => c.provider === m.provider && c.key)
+  );
 
   const toggleReveal = (provider: string) => {
     setRevealedKeys(prev => ({ ...prev, [provider]: !prev[provider] }));
@@ -185,6 +198,45 @@ export default function AdvancedSettings() {
             </div>
 
 
+            {/* Default Model Section */}
+            <div className="p-4 rounded-lg border border-border bg-card/50 backdrop-blur-sm space-y-4">
+                 <div className="flex items-start gap-4">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary mt-1">
+                        <Sparkles className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                        <h3 className="font-medium text-foreground">Default Model</h3>
+                        <p className="text-sm text-muted-foreground">
+                            Select the AI model used for summaries and chat.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="pt-2">
+                    {availableModels.length > 0 ? (
+                        <div className="relative">
+                            <select
+                                value={defaultModel || ''}
+                                onChange={(e) => setDefaultModel(e.target.value)}
+                                className="w-full bg-background border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary appearance-none"
+                            >
+                                <option value="" disabled>Select a model</option>
+                                {availableModels.map(m => (
+                                    <option key={m.id} value={m.id}>
+                                        {m.name} ({PROVIDERS.find(p => p.id === m.provider)?.name})
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                        </div>
+                    ) : (
+                        <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md border border-border/50">
+                            No models available. Please configure an API key below.
+                        </div>
+                    )}
+                </div>
+            </div>
+
             {/* API Credentials Section */}
             <div className="rounded-lg border border-border bg-card/50 backdrop-blur-sm overflow-hidden transition-all duration-200">
                 <button
@@ -203,37 +255,38 @@ export default function AdvancedSettings() {
 
                 {isApiSectionOpen && (
                     <div className="p-4 pt-0 space-y-4 border-t border-border/50 mt-2">
-                        {/* OpenRouter */}
-                        <div className="space-y-2 pt-4">
-                            <div className="flex items-center justify-between">
-                                <label className="text-sm font-medium text-foreground">OpenRouter API Key</label>
-                                <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
-                                    Get Key <ExternalLink className="h-3 w-3" />
-                                </a>
+                         {PROVIDERS.map((provider) => (
+                            <div key={provider.id} className="space-y-2 pt-4 first:pt-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-sm font-medium text-foreground">{provider.name} API Key</label>
+                                    <a href={PROVIDER_URLS[provider.id]} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                                        Get Key <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                </div>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={revealedKeys[provider.id] ? getCredential(provider.id) : (getCredential(provider.id) ? getCredential(provider.id).slice(0, 8) + '••••••••••••••••' : '')}
+                                        onChange={(e) => (revealedKeys[provider.id] || !getCredential(provider.id)) && handleKeyChange(provider.id, e.target.value)}
+                                        readOnly={!revealedKeys[provider.id] && !!getCredential(provider.id)}
+                                        className={`w-full bg-background border border-border rounded-md pl-3 pr-10 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary font-mono ${(!revealedKeys[provider.id] && !!getCredential(provider.id)) && 'opacity-75 cursor-default'}`}
+                                        placeholder={revealedKeys[provider.id] ? "sk-..." : "No API Key set"}
+                                    />
+                                    {!!getCredential(provider.id) && (
+                                        <button
+                                            onClick={() => toggleReveal(provider.id)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                            title={revealedKeys[provider.id] ? 'Hide and Lock' : 'Reveal and Edit'}
+                                        >
+                                            {revealedKeys[provider.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    value={revealedKeys['openrouter'] ? getCredential('openrouter') : (getCredential('openrouter') ? getCredential('openrouter').slice(0, 8) + '••••••••••••••••' : '')}
-                                    onChange={(e) => (revealedKeys['openrouter'] || !getCredential('openrouter')) && handleKeyChange('openrouter', e.target.value)}
-                                    readOnly={!revealedKeys['openrouter'] && !!getCredential('openrouter')}
-                                    className={`w-full bg-background border border-border rounded-md pl-3 pr-10 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary font-mono ${(!revealedKeys['openrouter'] && !!getCredential('openrouter')) && 'opacity-75 cursor-default'}`}
-                                    placeholder={revealedKeys['openrouter'] ? "sk-or-..." : "No API Key set"}
-                                />
-                                {!!getCredential('openrouter') && (
-                                    <button
-                                        onClick={() => toggleReveal('openrouter')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                        title={revealedKeys['openrouter'] ? 'Hide and Lock' : 'Reveal and Edit'}
-                                    >
-                                        {revealedKeys['openrouter'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                    </button>
-                                )}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                Required for AI features. Stored locally on your device.
-                            </p>
-                        </div>
+                         ))}
+                        <p className="text-xs text-muted-foreground pt-2">
+                            API keys are stored locally on your device and are never sent to any server other than the respective AI provider.
+                        </p>
                     </div>
                 )}
             </div>
